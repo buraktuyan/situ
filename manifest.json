@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Chrome AI Prompt Extension",
+  "version": "1.0.0",
+  "description": "A simple Chrome extension using Chrome's built-in AI Prompt API",
+  "permissions": [],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Prompt"
+  }
+}
