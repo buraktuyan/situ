@@ -9,27 +9,27 @@ const statusDiv = document.getElementById('status');
 // Check API availability on load
 async function checkAvailability() {
   try {
-    if (!self.ai || !self.ai.languageModel) {
+    if (!window.ai || !window.ai.languageModel) {
       showStatus('Chrome AI is not available in this browser', 'error');
       submitBtn.disabled = true;
       return false;
     }
 
-    const capabilities = await self.ai.languageModel.capabilities();
+    const availability = await window.ai.languageModel.availability();
 
-    if (capabilities.available === 'no') {
+    if (availability === 'no') {
       showStatus('Chrome AI is not available on this device', 'error');
       submitBtn.disabled = true;
       return false;
     }
 
-    if (capabilities.available === 'after-download') {
+    if (availability === 'after-download') {
       showStatus('Chrome AI model is downloading... Please wait and try again later', 'warning');
       submitBtn.disabled = true;
       return false;
     }
 
-    if (capabilities.available === 'readily') {
+    if (availability === 'readily') {
       showStatus('Chrome AI is ready!', 'success');
       return true;
     }
@@ -46,7 +46,7 @@ async function checkAvailability() {
 async function createSession() {
   try {
     if (!session) {
-      session = await self.ai.languageModel.create();
+      session = await window.ai.languageModel.create();
     }
     return session;
   } catch (error) {

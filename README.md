@@ -54,7 +54,7 @@ After enabling the flags:
 1. Open Chrome DevTools (F12) on any page
 2. Run this command in the Console:
    ```javascript
-   await self.ai.languageModel.create();
+   await ai.languageModel.create();
    ```
 3. Wait for the model to download (this may take several minutes)
 4. You can check download progress in `chrome://components/` - look for "Optimization Guide On Device Model"
@@ -89,17 +89,16 @@ The extension demonstrates the basic Prompt API workflow:
 
 ```javascript
 // Check availability
-const capabilities = await self.ai.languageModel.capabilities();
-if (capabilities.available === 'readily') {
-  // Create a session
-  const session = await self.ai.languageModel.create();
+const availability = await window.ai.languageModel.availability();
 
-  // Get streaming response
-  const stream = await session.promptStreaming(prompt);
-  for await (const chunk of stream) {
-    // Update UI with each chunk
-    console.log(chunk);
-  }
+// Create a session
+const session = await window.ai.languageModel.create();
+
+// Get streaming response
+const stream = await session.promptStreaming(prompt);
+for await (const chunk of stream) {
+  // Update UI with each chunk
+  console.log(chunk);
 }
 ```
 
@@ -117,7 +116,7 @@ if (capabilities.available === 'readily') {
 
 ### Responses not working
 - Open DevTools Console (F12) to see any error messages
-- Try creating a session manually in the console: `await self.ai.languageModel.create()`
+- Try creating a session manually in the console: `await ai.languageModel.create()`
 - Restart Chrome after enabling flags
 
 ## Limitations
