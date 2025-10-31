@@ -9,49 +9,33 @@ const statusDiv = document.getElementById('status');
 // Check API availability on load
 async function checkAvailability() {
   try {
-    if (!self.ai || !self.ai.languageModel) {
-      showStatus('Chrome AI is not available in this browser', 'error');
+    // Check if the global LanguageModel API is available
+    if (typeof LanguageModel === "undefined") {
+      showStatus('Global LanguageModel API is not available. Please enable Chrome AI flags.', 'error');
       submitBtn.disabled = true;
       return false;
     }
 
-    const capabilities = await self.ai.languageModel.capabilities();
+    // Check model availability using the new API
+    const availability = await LanguageModel.availability();
 
-    if (capabilities.available === 'no') {
-      showStatus('Chrome AI is not available on this device', 'error');
-      submitBtn.disabled = true;
-      return false;
-    }
-
-    if (capabilities.available === 'after-download') {
+    if (availability === 'available') {
+      showStatus('Chrome AI is ready!', 'success');
+      submitBtn.disabled = false;
+      return true;
+    } else if (availability === 'downloading') {
       showStatus('Chrome AI model is downloading... Please wait and try again later', 'warning');
       submitBtn.disabled = true;
       return false;
+    } else {
+      showStatus(`Model is not ready. Status: '${availability}'. Check chrome://on-device-internals`, 'error');
+      submitBtn.disabled = true;
+      return false;
     }
-
-    if (capabilities.available === 'readily') {
-      showStatus('Chrome AI is ready!', 'success');
-      return true;
-    }
-
-    return false;
   } catch (error) {
     showStatus(`Error checking availability: ${error.message}`, 'error');
     submitBtn.disabled = true;
     return false;
-  }
-}
-
-// Create AI session
-async function createSession() {
-  try {
-    if (!session) {
-      session = await self.ai.languageModel.create();
-    }
-    return session;
-  } catch (error) {
-    showStatus(`Error creating session: ${error.message}`, 'error');
-    throw error;
   }
 }
 
@@ -85,29 +69,35 @@ async function handleSubmit() {
   isProcessing = true;
   submitBtn.disabled = true;
   responseDiv.textContent = '';
-  showStatus('Processing...', 'info');
+  showStatus('Thinking...', 'info');
 
   try {
-    // Create session if not exists
-    const aiSession = await createSession();
-
-    // Stream the response
-    const stream = await aiSession.promptStreaming(prompt);
-
-    let fullResponse = '';
-
-    for await (const chunk of stream) {
-      fullResponse = chunk;
-      responseDiv.textContent = fullResponse;
-      // Auto-scroll to bottom
-      responseDiv.scrollTop = responseDiv.scrollHeight;
+    // Create a new session
+    if (!session) {
+      session = await LanguageModel.create({
+        expectedOutputs: [
+          { type: "text", languages: ["en"] }
+        ]
+      });
+      showStatus('Session created. Sending prompt...', 'info');
     }
 
-    showStatus('Response complete!', 'success');
+    // Send the prompt to the model
+    const response = await session.prompt(prompt);
+
+    // Display the response
+    responseDiv.textContent = response;
+    showStatus('Response generated!', 'success');
   } catch (error) {
     showStatus(`Error: ${error.message}`, 'error');
     responseDiv.textContent = `Error: ${error.message}\n\nPlease make sure you're using Chrome 128+ and have enabled the Prompt API feature flags.`;
   } finally {
+    // Clean up the session
+    if (session) {
+      await session.destroy();
+      session = null;
+      console.log('Session destroyed.');
+    }
     isProcessing = false;
     submitBtn.disabled = false;
   }
