@@ -75,8 +75,29 @@ export const AI_PROMPTS = {
   getDifficulty: (word) =>
     `Evaluate the difficulty level of the word/phrase "${word}" for English language learners. Respond with ONLY one word: "beginner", "intermediate", or "advanced". Consider: word frequency, complexity, and common usage.`,
 
-  getContextualSuggestion: (text, targetWords) =>
-    `Given this text: "${text}"\n\nSuggest how to naturally incorporate one of these vocabulary words: ${targetWords.join(', ')}. Provide the complete rewritten sentence.`,
+  getContextualSuggestion: (text, targetWords, recentWords = []) =>
+    `You are a writing assistant helping improve text quality and vocabulary usage.
+
+Given this text: "${text}"
+
+Provide TWO levels of suggestions using proper HTML formatting (NO markdown):
+
+<strong>Level 1: Enhanced Version</strong>
+Rewrite the sentence at a more proficient level (one level up from current). Make it more sophisticated, clear, or eloquent while preserving the original meaning. Provide ONE better variation.
+
+<strong>Level 2: Vocabulary Integration</strong>
+${recentWords.length > 0
+  ? `Check if the text uses any of these recently added vocabulary words: ${recentWords.join(', ')}. If yes, acknowledge it. If not, provide an extended sentence or paragraph (following up on the existing text) that naturally incorporates the most relevant word from this list: ${targetWords.join(', ')}.`
+  : `Provide an extended sentence or paragraph (following up on the existing text) that naturally incorporates one of these vocabulary words: ${targetWords.join(', ')}.`}
+
+Format your response as HTML with proper tags:
+- Use <strong> for headings/labels
+- Use <p> for paragraphs
+- Use <em> for emphasis if needed
+- Use <br> for line breaks
+- Do NOT use markdown syntax (no **, __, or #)
+
+Keep the response concise and practical.`,
 
   evaluateWritingChallenge: (word, sentence) =>
     `You are a helpful and experienced ESL teacher providing supportive feedback on student writing.

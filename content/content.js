@@ -442,6 +442,12 @@
     // Create suggestion button
     const button = createSuggestionButton(field);
 
+    const repositionButton = () => {
+      if (button && document.body.contains(button)) {
+        positionSuggestionButton(field, button);
+      }
+    };
+
     field.addEventListener('focus', () => {
       updateButtonVisibility(field, button);
       if (button && !document.body.contains(button)) {
@@ -453,6 +459,11 @@
     field.addEventListener('input', () => {
       updateButtonVisibility(field, button);
     });
+
+    // Reposition button when text selection changes
+    field.addEventListener('mouseup', repositionButton);
+    field.addEventListener('keyup', repositionButton);
+    field.addEventListener('select', repositionButton);
 
     field.addEventListener('blur', () => {
       setTimeout(() => {
@@ -491,10 +502,28 @@
   }
 
   function positionSuggestionButton(field, button) {
-    const rect = field.getBoundingClientRect();
+    let targetRect;
+
+    // Check if there's a text selection
+    if (field.selectionStart !== undefined && field.selectionStart !== field.selectionEnd) {
+      // For input/textarea elements with text selection
+      // Create a temporary element to measure the selection position
+      const fieldRect = field.getBoundingClientRect();
+      const computedStyle = window.getComputedStyle(field);
+      const paddingLeft = parseFloat(computedStyle.paddingLeft);
+      const paddingTop = parseFloat(computedStyle.paddingTop);
+
+      // Use the field's rect and position button at bottom right
+      // (calculating exact selection position in textarea is complex, so we use field bounds)
+      targetRect = fieldRect;
+    } else {
+      // No selection, use field bounds
+      targetRect = field.getBoundingClientRect();
+    }
+
     button.style.position = 'fixed';
-    button.style.top = `${rect.bottom + window.scrollY + 5}px`;
-    button.style.right = `${window.innerWidth - rect.right}px`;
+    button.style.top = `${targetRect.bottom + 5}px`;
+    button.style.left = `${targetRect.right - button.offsetWidth - 10}px`;
   }
 
   async function showWritingSuggestions(field) {
@@ -505,7 +534,12 @@
       return;
     }
 
-    // Get relevant vocabulary words
+    // Get the last 10 added vocabulary words (most recent)
+    const recentWords = vocabulary
+      .slice(0, 10)
+      .map(v => v.word);
+
+    // Get relevant vocabulary words not already in the text
     const targetWords = vocabulary
       .filter(v => !text.toLowerCase().includes(v.word.toLowerCase()))
       .slice(0, 5)
@@ -523,7 +557,8 @@
       const response = await chrome.runtime.sendMessage({
         action: 'getWritingSuggestion',
         text: text,
-        targetWords: targetWords
+        targetWords: targetWords,
+        recentWords: recentWords
       });
 
       if (response.success) {
@@ -584,30 +619,25 @@
     if (loadingContainer) loadingContainer.style.display = 'none';
     if (contentContainer) {
       contentContainer.style.display = 'block';
+      // Render HTML directly (suggestion now contains proper HTML formatting)
       contentContainer.innerHTML = `
         <div class="situ-suggestion-box">
-          <div class="situ-suggestion-label">Suggested text:</div>
-          <div class="situ-suggestion-text">${escapeHtml(suggestion)}</div>
+          <div class="situ-suggestion-text">${suggestion}</div>
         </div>
         <div class="situ-target-words-box">
-          <div class="situ-target-label">Using vocabulary:</div>
+          <div class="situ-target-label">Target vocabulary:</div>
           <div class="situ-target-chips">
             ${targetWords.map(word => `<span class="situ-word-chip">${escapeHtml(word)}</span>`).join('')}
           </div>
         </div>
         <div class="situ-panel-actions">
           <button class="situ-btn-secondary" data-action="dismiss">Dismiss</button>
-          <button class="situ-btn-primary" data-action="apply">Apply</button>
         </div>
       `;
 
       // Add event handlers for buttons
       const field = panel._field;
       contentContainer.querySelector('[data-action="dismiss"]').addEventListener('click', removeSuggestionPanel);
-      contentContainer.querySelector('[data-action="apply"]').addEventListener('click', () => {
-        applySuggestion(field, suggestion);
-        removeSuggestionPanel();
-      });
     }
   }
 

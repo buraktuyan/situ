@@ -155,13 +155,13 @@ export class AIHelper {
   /**
    * Get writing suggestion
    */
-  static async getWritingSuggestion(text, targetWords) {
+  static async getWritingSuggestion(text, targetWords, recentWords = []) {
     try {
       if (!targetWords || targetWords.length === 0) {
         return { success: false, error: 'No target words provided' };
       }
 
-      const prompt = AI_PROMPTS.getContextualSuggestion(text, targetWords);
+      const prompt = AI_PROMPTS.getContextualSuggestion(text, targetWords, recentWords);
       const result = await this.prompt(prompt);
 
       if (result.success) {
