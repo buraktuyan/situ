@@ -89,10 +89,14 @@ h2 {
   border-color: #667eea;
 }
 
-#submitBtn {
-  width: 100%;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.button-group {
+  display: flex;
+  gap: 8px;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 12px 16px;
   color: white;
   border: none;
   border-radius: 6px;
@@ -102,16 +106,29 @@ h2 {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-#submitBtn:hover:not(:disabled) {
+#submitBtn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+#streamBtn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+#stopBtn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  flex: 0.5;
+}
+
+.button-group button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-#submitBtn:active:not(:disabled) {
+.button-group button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-#submitBtn:disabled {
+.button-group button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
