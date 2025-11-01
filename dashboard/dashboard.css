@@ -342,6 +342,7 @@ body {
   justify-content: space-between;
   align-items: start;
   margin-bottom: 12px;
+  padding-right: 110px; /* Reserve space for difficulty badge */
 }
 
 .word-title {

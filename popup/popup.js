@@ -128,20 +128,20 @@ function renderRecentWords() {
     .slice(0, 3);
 
   recentWordsList.innerHTML = recentWords.map(word => `
-    <div class="word-item" data-word-id="${word.id}">
-      <div class="word-item-header">
-        <div class="word-text">${word.word}</div>
-        <div class="word-stats">
+    <div class="situ-word-item" data-word-id="${word.id}">
+      <div class="situ-word-item-header">
+        <div class="situ-word-text">${word.word}</div>
+        <div class="situ-word-stats">
           <span title="Times seen">👁️ ${word.seenCount || 0}</span>
           <span title="Times used">✍️ ${word.usedCount || 0}</span>
         </div>
       </div>
-      ${word.definition ? `<div class="word-definition">${truncate(word.definition, 80)}</div>` : ''}
+      ${word.definition ? `<div class="situ-word-definition">${truncate(word.definition, 80)}</div>` : ''}
     </div>
   `).join('');
 
   // Add click listeners
-  document.querySelectorAll('.word-item').forEach(item => {
+  document.querySelectorAll('.situ-word-item').forEach(item => {
     item.addEventListener('click', () => {
       const wordId = item.getAttribute('data-word-id');
       openDashboardWithWord(wordId);
