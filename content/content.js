@@ -9,6 +9,9 @@
   let settings = {};
   let highlightedElements = new Set();
   let writingAssistants = new Map();
+  let seenWordsThisSession = new Set(); // Track words seen this session
+  let pendingStatUpdates = { wordsSeen: 0 }; // Batch stat updates
+  let statsUpdateTimeout = null;
 
   // Initialize
   async function initialize() {
@@ -80,8 +83,18 @@
             return NodeFilter.FILTER_REJECT;
           }
 
-          if (parent.classList.contains('situ-highlight')) {
-            return NodeFilter.FILTER_REJECT;
+          // Skip any Situ UI elements (tooltips, cards, panels, etc.)
+          let element = parent;
+          while (element) {
+            if (element.classList) {
+              // Check if any class starts with 'situ-'
+              for (let className of element.classList) {
+                if (className.startsWith('situ-')) {
+                  return NodeFilter.FILTER_REJECT;
+                }
+              }
+            }
+            element = element.parentElement;
           }
 
           // Check if text contains any vocabulary word
@@ -168,11 +181,21 @@
 
     highlightedElements.add(span);
 
-    // Track that word was seen
-    chrome.runtime.sendMessage({
-      action: 'incrementSeenCount',
-      word: word
-    });
+    // Track that word was seen (only once per session)
+    const wordKey = word.toLowerCase();
+    if (!seenWordsThisSession.has(wordKey)) {
+      seenWordsThisSession.add(wordKey);
+
+      // Increment vocabulary item seen count immediately (single write)
+      chrome.runtime.sendMessage({
+        action: 'incrementSeenCountOnly',
+        word: word
+      });
+
+      // Batch stat updates to avoid quota issues
+      pendingStatUpdates.wordsSeen++;
+      scheduleStatsUpdate();
+    }
 
     return span;
   }
@@ -298,6 +321,39 @@
       subtree: true
     });
   }
+
+  // ============ STATS BATCHING ============
+
+  function scheduleStatsUpdate() {
+    // Clear existing timeout
+    if (statsUpdateTimeout) {
+      clearTimeout(statsUpdateTimeout);
+    }
+
+    // Schedule batched update after 5 seconds of inactivity
+    statsUpdateTimeout = setTimeout(() => {
+      flushStatsUpdates();
+    }, 5000);
+  }
+
+  function flushStatsUpdates() {
+    if (pendingStatUpdates.wordsSeen > 0) {
+      chrome.runtime.sendMessage({
+        action: 'batchUpdateStats',
+        updates: { ...pendingStatUpdates }
+      });
+
+      // Reset pending updates
+      pendingStatUpdates.wordsSeen = 0;
+    }
+
+    statsUpdateTimeout = null;
+  }
+
+  // Flush stats on page unload
+  window.addEventListener('beforeunload', () => {
+    flushStatsUpdates();
+  });
 
   // ============ WRITING MODE ============
 

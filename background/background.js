@@ -164,6 +164,16 @@ async function handleMessage(message, sender, sendResponse) {
         sendResponse({ success: true });
         break;
 
+      case 'incrementSeenCountOnly':
+        await StorageManager.incrementSeenCountOnly(message.word);
+        sendResponse({ success: true });
+        break;
+
+      case 'batchUpdateStats':
+        await StorageManager.batchUpdateStats(message.updates);
+        sendResponse({ success: true });
+        break;
+
       case 'incrementUsedCount':
         await StorageManager.incrementUsedCount(message.word);
         sendResponse({ success: true });
