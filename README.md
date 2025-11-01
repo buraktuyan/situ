@@ -1,138 +1,220 @@
-# Chrome AI Prompt Extension
+# Situ - Learn Vocabulary While Browsing
 
-A simple Chrome extension that uses Chrome's built-in AI (Gemini Nano) via the Prompt API to generate responses to user prompts with streaming support.
+**Tagline:** *Learn vocabulary while browsing*
 
-## Features
+Situ is a powerful Chrome Extension designed for ESL (English as a Second Language) students that seamlessly integrates vocabulary learning into your daily browsing experience. No dedicated study time needed—learning happens *in situ*, with subtle nudges and tracking.
 
-- Simple and intuitive popup interface
-- Real-time streaming responses from Chrome's built-in AI
-- Automatic API availability checking
-- Clean, modern UI with gradient design
-- Support for Ctrl+Enter keyboard shortcut to submit prompts
+## 🌟 Features
 
-## Requirements
+### 📖 Reading Mode
+- **Automatic Highlighting**: Your target vocabulary words are automatically highlighted on any webpage you visit
+- **Instant Definitions**: Hover over highlighted words to see definitions and usage stats
+- **Detailed Word Cards**: Click on any highlighted word to see full details, examples, and synonyms
+- **Smart Tracking**: Automatically tracks how many times you've encountered each word
 
-### Browser Requirements
-- **Chrome 128 or later** (Stable, Dev, or Canary)
-- Supported on:
-  - Windows 10 or 11
-  - macOS 13+ (Ventura and onwards)
-  - Linux
-  - ChromeOS (Platform 16389.0.0+) on Chromebook Plus devices
+### ✍️ Writing Mode
+- **Contextual Suggestions**: Get AI-powered suggestions to use your target vocabulary in text fields
+- **Seamless Integration**: Works on Gmail, Reddit, Discord, and any text input field
+- **Usage Tracking**: Tracks when you successfully use your vocabulary words in writing
+- **Natural Learning**: Helps activate passive vocabulary through practical use
 
-### Hardware Requirements
-- At least 22 GB of free space on the volume that contains your Chrome profile
-- One of the following:
-  - GPU with more than 4 GB of VRAM, OR
-  - CPU with 16 GB of RAM or more and 4+ CPU cores
+### 🤖 AI-Powered Features
+- **Auto-Enrichment**: Uses Chrome's built-in AI (LanguageModel API) to automatically generate definitions, examples, and synonyms
+- **100% Local Processing**: All AI features run on-device for privacy and speed
+- **Smart Examples**: Get contextually relevant example sentences for each word
+- **Synonym Discovery**: Automatically find related words to expand your vocabulary
 
-## Setup Instructions
+### 📱 Beautiful Interface
+- **Modern Design**: Clean, purple-themed interface following accessibility best practices
+- **Quick Access Popup**: View stats and add words with a single click
+- **Comprehensive Dashboard**: Manage your entire vocabulary library
+- **Practice Mode**: Flashcard-based practice to reinforce learning
 
-### 1. Enable Chrome AI Features
+### 📊 Progress Tracking
+- **Daily Statistics**: See how many words you've encountered and used each day
+- **Weekly Charts**: Visualize your learning progress over time
+- **Top Words**: Track which words you encounter most frequently
+- **Goal Setting**: Set daily encounter goals to stay motivated
 
-Since the Prompt API is experimental, you need to enable it first:
+### 🔧 Customization
+- **Highlight Styles**: Choose between background highlighting, underlines, or both
+- **Difficulty Levels**: Organize words by beginner, intermediate, or advanced levels
+- **Flexible Settings**: Toggle reading and writing modes independently
+- **Import/Export**: Backup and share your vocabulary lists
 
-#### Option A: Using Chrome Flags (Recommended for Chrome 128+)
+## 🚀 Installation
 
-1. Open Chrome and navigate to `chrome://flags`
-2. Search for and enable the following flags:
-   - `chrome://flags/#optimization-guide-on-device-model`
-   - `chrome://flags/#prompt-api-for-gemini-nano`
-3. Relaunch Chrome when prompted
+### Prerequisites
+- **Chrome Browser**: Version 128 or later
+- **Chrome AI Features**: Enable the Prompt API in Chrome flags
+  1. Navigate to `chrome://flags`
+  2. Search for "Prompt API for Gemini Nano"
+  3. Enable the feature
+  4. Restart Chrome
 
-#### Option B: Using Command Line Flags
-
-Launch Chrome with these flags:
-```bash
-chrome --enable-features=OptimizationGuideModelDownloading,PromptAPIForGeminiNano,AIPromptAPI
-```
-
-### 2. Download the Gemini Nano Model
-
-After enabling the flags:
-
-1. Open Chrome DevTools (F12) on any page
-2. Run this command in the Console:
-   ```javascript
-   await self.ai.languageModel.create();
-   ```
-3. Wait for the model to download (this may take several minutes)
-4. You can check download progress in `chrome://components/` - look for "Optimization Guide On Device Model"
-
-### 3. Install the Extension
-
-1. Clone or download this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode" (toggle in top right)
+### Install the Extension
+1. Clone this repository or download the source code
+2. Open Chrome and navigate to `chrome://extensions`
+3. Enable "Developer mode" (toggle in top-right corner)
 4. Click "Load unpacked"
-5. Select the directory containing this extension
+5. Select the `situ` directory
+6. The extension icon should appear in your toolbar!
 
-## Usage
+## 📖 Usage Guide
 
-1. Click the extension icon in Chrome's toolbar to open the popup
-2. The status bar will show if Chrome AI is ready
-3. Enter your prompt in the text area
-4. Click "Send Prompt" or press Ctrl+Enter
-5. Watch as the AI response streams in real-time!
+### Adding Words
 
-## How It Works
+**Method 1: Context Menu**
+- Select any word or phrase on a webpage
+- Right-click and choose "Add to Situ"
+- The word will be automatically enriched with AI-generated content
 
-This extension uses Chrome's built-in AI capabilities:
+**Method 2: Popup**
+- Click the Situ icon in your toolbar
+- Type a word in the "Add New Word" field
+- Click the + button
 
-- **Prompt API**: Provides access to the Gemini Nano model running locally on your device
-- **Streaming**: Responses are streamed chunk by chunk for a better user experience
-- **On-Device**: All processing happens locally - no data is sent to external servers
+**Method 3: Dashboard**
+- Open the Dashboard from the popup
+- Click "Add Word"
+- Fill in details manually or use AI assistance
 
-## API Usage
+### Using Reading Mode
 
-The extension demonstrates the basic Prompt API workflow:
+1. Add words to your vocabulary
+2. Ensure Reading Mode is enabled (toggle in popup)
+3. Browse any website
+4. Your vocabulary words will be automatically highlighted
+5. Hover for quick definitions
+6. Click for detailed information
 
-```javascript
-// Check availability
-const capabilities = await self.ai.languageModel.capabilities();
-if (capabilities.available === 'readily') {
-  // Create a session
-  const session = await self.ai.languageModel.create();
+### Using Writing Mode
 
-  // Get streaming response
-  const stream = await session.promptStreaming(prompt);
-  for await (const chunk of stream) {
-    // Update UI with each chunk
-    console.log(chunk);
-  }
-}
+1. Ensure Writing Mode is enabled (toggle in popup)
+2. Click on any text field on a website
+3. Look for the "✨ Enrich" button
+4. Click to get AI suggestions using your vocabulary
+5. Review and apply suggestions to enhance your writing
+
+### Practice with Flashcards
+
+1. Open the Dashboard
+2. Go to the "Practice" tab
+3. Click "Start Practice" under Flashcards
+4. Click cards to flip and reveal definitions
+5. Navigate with Previous/Next buttons
+
+## 🏗️ Project Structure
+
+```
+situ/
+├── manifest.json              # Extension configuration
+├── background/
+│   └── background.js          # Service worker (context menus, messaging)
+├── content/
+│   ├── content.js             # Reading & Writing mode logic
+│   └── content.css            # Content script styling
+├── popup/
+│   ├── popup.html             # Quick-access popup
+│   ├── popup.js               # Popup functionality
+│   └── popup.css              # Popup styling
+├── dashboard/
+│   ├── dashboard.html         # Full dashboard interface
+│   ├── dashboard.js           # Dashboard functionality
+│   └── dashboard.css          # Dashboard styling
+├── utils/
+│   ├── constants.js           # Shared constants
+│   ├── storage.js             # Storage management
+│   └── ai-helper.js           # AI/LanguageModel interface
+├── icons/
+│   ├── icon16.png
+│   ├── icon48.png
+│   └── icon128.png
+└── README.md
 ```
 
-## Troubleshooting
+## 🎨 Design Philosophy
 
-### "Chrome AI is not available"
-- Make sure you're using Chrome 128 or later
-- Verify you've enabled the required flags
-- Check that your device meets the hardware requirements
+### Color Palette
+- **Primary**: Dark Purple (#6B46C1) - Trust, wisdom, learning
+- **Accent**: Pink (#EC4899) - Highlights, attention
+- **Success**: Green (#10B981) - Achievement, progress
+- **Background**: White (#FFFFFF) - Clean, professional
 
-### "Chrome AI model is downloading"
-- Wait for the download to complete
-- Check progress at `chrome://components/`
-- Ensure you have enough free disk space (22+ GB)
+### Accessibility
+- ARIA labels on all interactive elements
+- Keyboard navigation support
+- High contrast ratios for readability
+- Focus indicators for screen readers
+- Semantic HTML structure
 
-### Responses not working
-- Open DevTools Console (F12) to see any error messages
-- Try creating a session manually in the console: `await self.ai.languageModel.create()`
-- Restart Chrome after enabling flags
+## 🔒 Privacy & Security
 
-## Limitations
+- **100% Local Processing**: All AI features run on-device using Chrome's built-in LanguageModel API
+- **No External Servers**: Your vocabulary never leaves your browser
+- **Chrome Storage Sync**: Optional sync across your Chrome browsers using your Google account
+- **No Analytics**: We don't track your usage or collect any data
+- **Open Source**: Full transparency - review the code yourself
 
-- Only works in Chrome 128+ with flags enabled
-- Requires significant disk space and RAM
-- Single session model (no concurrent requests)
-- Currently supports English, Spanish, and Japanese (as of Chrome 140+)
+## 🛠️ Technology Stack
 
-## Resources
+- **Manifest V3**: Latest Chrome Extension standard
+- **ES6+ JavaScript**: Modern, clean code
+- **HTML5 & CSS3**: Semantic markup and modern styling
+- **Chrome Storage Sync**: Cross-device vocabulary synchronization
+- **Chrome LanguageModel API**: On-device AI for definitions and examples
+- **Content Scripts**: Seamless webpage integration
 
-- [Chrome AI Documentation](https://developer.chrome.com/docs/ai/built-in)
-- [Prompt API Guide](https://developer.chrome.com/docs/ai/prompt-api)
-- [Chrome Built-in AI Challenge 2025](https://googlechromeai2025.devpost.com/)
+## 📝 Development
 
-## License
+### Contributing
+We welcome contributions! Please feel free to submit issues, feature requests, or pull requests.
 
-See LICENSE file for details.
+### Building from Source
+No build process required! This is a pure JavaScript extension.
+
+1. Clone the repository
+2. Make your changes
+3. Test in Chrome using "Load unpacked"
+4. Submit a pull request
+
+### Future Enhancements
+- [ ] Support for multiple languages beyond English
+- [ ] Audio pronunciations
+- [ ] Spaced repetition algorithm
+- [ ] Word families and etymology
+- [ ] Integration with popular vocabulary APIs
+- [ ] Mobile companion app
+- [ ] Collaborative vocabulary lists
+- [ ] Gamification features
+
+## 🐛 Known Limitations
+
+- Requires Chrome 128+ with AI features enabled
+- AI model must be downloaded (happens automatically on first use)
+- Works best with English language content
+- Some websites with complex JavaScript may not highlight correctly
+- Maximum vocabulary size: 1000 words (Chrome storage limitation)
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+## 🙏 Acknowledgments
+
+- Built with Chrome's experimental LanguageModel API
+- Inspired by the need for contextual, integrated language learning
+- Designed for ESL students worldwide
+
+## 📞 Support
+
+For issues, questions, or feature requests:
+- Open an issue on GitHub
+- Check existing issues for solutions
+- Review the Chrome AI documentation at https://developer.chrome.com/docs/ai/
+
+---
+
+**Made with 💜 for language learners everywhere**
+
+*Situ - Because the best time to learn is when you're already engaged*

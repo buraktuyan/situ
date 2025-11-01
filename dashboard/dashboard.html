@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Situ Dashboard - Vocabulary Learning</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">
+          <span class="logo-icon">📚</span>
+          Situ
+        </h1>
+        <p class="tagline">Learn vocabulary while browsing</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Dashboard navigation">
+        <button class="nav-item active" data-tab="vocabulary">
+          <span class="nav-icon">📖</span>
+          <span class="nav-text">Vocabulary</span>
+        </button>
+        <button class="nav-item" data-tab="practice">
+          <span class="nav-icon">🎯</span>
+          <span class="nav-text">Practice</span>
+        </button>
+        <button class="nav-item" data-tab="stats">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Statistics</span>
+        </button>
+        <button class="nav-item" data-tab="settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">Settings</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Vocabulary Tab -->
+      <section id="vocabulary" class="tab-content active">
+        <header class="content-header">
+          <h2>My Vocabulary</h2>
+          <div class="header-actions">
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="Search words..." aria-label="Search vocabulary" />
+              <span class="search-icon">🔍</span>
+            </div>
+            <button id="addNewWordBtn" class="btn-primary">
+              <span class="btn-icon">+</span>
+              Add Word
+            </button>
+          </div>
+        </header>
+
+        <div class="filters">
+          <select id="sortSelect" aria-label="Sort vocabulary">
+            <option value="recent">Recently Added</option>
+            <option value="alphabetical">Alphabetical</option>
+            <option value="mostSeen">Most Seen</option>
+            <option value="mostUsed">Most Used</option>
+          </select>
+          <select id="difficultyFilter" aria-label="Filter by difficulty">
+            <option value="all">All Levels</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+
+        <div id="vocabularyList" class="vocabulary-grid">
+          <div class="loading">Loading vocabulary</div>
+        </div>
+      </section>
+
+      <!-- Practice Tab -->
+      <section id="practice" class="tab-content">
+        <header class="content-header">
+          <h2>Practice</h2>
+          <p class="subtitle">Review and practice your vocabulary</p>
+        </header>
+
+        <div class="practice-modes">
+          <div class="practice-card">
+            <h3>📝 Flashcards</h3>
+            <p>Review word definitions and examples</p>
+            <button class="btn-secondary" id="startFlashcardsBtn">Start Practice</button>
+          </div>
+          <div class="practice-card">
+            <h3>✍️ Writing Challenge</h3>
+            <p>Use your vocabulary in sentences</p>
+            <button class="btn-secondary" id="startWritingBtn">Start Challenge</button>
+          </div>
+        </div>
+
+        <!-- Flashcard view -->
+        <div id="flashcardView" class="flashcard-container" style="display: none;">
+          <div class="flashcard" id="flashcard">
+            <div class="flashcard-inner">
+              <div class="flashcard-front">
+                <h3 id="flashcardWord"></h3>
+                <p class="hint">Click to see definition</p>
+              </div>
+              <div class="flashcard-back">
+                <p id="flashcardDefinition"></p>
+                <div id="flashcardExamples"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flashcard-controls">
+            <button id="prevFlashcard" class="btn-secondary">← Previous</button>
+            <span id="flashcardProgress">1 / 10</span>
+            <button id="nextFlashcard" class="btn-primary">Next →</button>
+          </div>
+          <button id="exitFlashcards" class="btn-link">Exit Practice</button>
+        </div>
+      </section>
+
+      <!-- Stats Tab -->
+      <section id="stats" class="tab-content">
+        <header class="content-header">
+          <h2>Statistics</h2>
+          <p class="subtitle">Track your learning progress</p>
+        </header>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-icon">📚</div>
+            <div class="stat-value" id="totalWordsCount">0</div>
+            <div class="stat-label">Total Words</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-value" id="totalSeenCount">0</div>
+            <div class="stat-label">Words Seen</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">✍️</div>
+            <div class="stat-value" id="totalUsedCount">0</div>
+            <div class="stat-label">Words Used</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value" id="dailyGoalProgress">0%</div>
+            <div class="stat-label">Daily Goal</div>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Last 7 Days</h3>
+          <div id="weeklyChart" class="weekly-chart">
+            <!-- Simple bar chart will be rendered here -->
+          </div>
+        </div>
+
+        <div class="top-words">
+          <h3>Most Encountered</h3>
+          <div id="topWordsList" class="top-words-list">
+            <!-- Top words will be rendered here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Tab -->
+      <section id="settings" class="tab-content">
+        <header class="content-header">
+          <h2>Settings</h2>
+          <p class="subtitle">Customize your learning experience</p>
+        </header>
+
+        <div class="settings-groups">
+          <!-- General Settings -->
+          <div class="settings-group">
+            <h3>General</h3>
+            <div class="setting-item">
+              <label class="setting-label">
+                <div class="setting-info">
+                  <span class="setting-name">Reading Mode</span>
+                  <span class="setting-description">Highlight vocabulary words on web pages</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settingReadingMode" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">
+                <div class="setting-info">
+                  <span class="setting-name">Writing Mode</span>
+                  <span class="setting-description">Get vocabulary suggestions in text fields</span>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settingWritingMode" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </label>
+            </div>
+          </div>
+
+          <!-- Appearance Settings -->
+          <div class="settings-group">
+            <h3>Appearance</h3>
+            <div class="setting-item">
+              <label class="setting-label">
+                <span class="setting-name">Highlight Style</span>
+                <select id="settingHighlightStyle" class="setting-select">
+                  <option value="background">Background</option>
+                  <option value="underline">Underline</option>
+                  <option value="both">Both</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- Learning Settings -->
+          <div class="settings-group">
+            <h3>Learning</h3>
+            <div class="setting-item">
+              <label class="setting-label">
+                <span class="setting-name">Daily Goal</span>
+                <input type="number" id="settingDailyGoal" class="setting-input" min="1" max="100" />
+              </label>
+            </div>
+            <div class="setting-item">
+              <label class="setting-label">
+                <span class="setting-name">Difficulty Level</span>
+                <select id="settingDifficulty" class="setting-select">
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!-- Data Management -->
+          <div class="settings-group">
+            <h3>Data Management</h3>
+            <div class="setting-item">
+              <button id="exportDataBtn" class="btn-secondary">Export Vocabulary</button>
+              <button id="importDataBtn" class="btn-secondary">Import Vocabulary</button>
+              <input type="file" id="importFileInput" accept=".json" style="display: none;" />
+            </div>
+            <div class="setting-item">
+              <button id="clearDataBtn" class="btn-danger">Clear All Data</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add/Edit Word Modal -->
+  <div id="wordModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Word</h3>
+        <button class="modal-close" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="wordInput">Word or Phrase *</label>
+          <input type="text" id="wordInput" required />
+        </div>
+        <div class="form-group">
+          <label for="definitionInput">Definition</label>
+          <textarea id="definitionInput" rows="3"></textarea>
+          <button id="getDefinitionBtn" class="btn-link-small">Get AI Definition</button>
+        </div>
+        <div class="form-group">
+          <label for="examplesInput">Examples (one per line)</label>
+          <textarea id="examplesInput" rows="3" placeholder="Enter example sentences..."></textarea>
+          <button id="getExampleBtn" class="btn-link-small">Get AI Example</button>
+        </div>
+        <div class="form-group">
+          <label for="synonymsInput">Synonyms (comma separated)</label>
+          <input type="text" id="synonymsInput" placeholder="word1, word2, word3" />
+        </div>
+        <div class="form-group">
+          <label for="difficultyInput">Difficulty Level</label>
+          <select id="difficultyInput">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="notesInput">Notes</label>
+          <textarea id="notesInput" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelWordBtn" class="btn-secondary">Cancel</button>
+        <button id="saveWordBtn" class="btn-primary">Save Word</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>
