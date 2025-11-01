@@ -117,6 +117,34 @@
           </div>
           <button id="exitFlashcards" class="btn-link">Exit Practice</button>
         </div>
+
+        <!-- Writing Challenge view -->
+        <div id="writingChallengeView" class="writing-challenge-container" style="display: none;">
+          <div class="writing-challenge">
+            <h3>Use this word in a sentence:</h3>
+            <div class="challenge-word" id="challengeWord"></div>
+            <div class="challenge-definition" id="challengeDefinition"></div>
+
+            <div class="challenge-input-area">
+              <label for="userSentence">Your sentence:</label>
+              <textarea
+                id="userSentence"
+                class="challenge-textarea"
+                placeholder="Write a sentence using the word..."
+                rows="4"
+              ></textarea>
+            </div>
+
+            <div class="challenge-feedback" id="challengeFeedback"></div>
+
+            <div class="challenge-controls">
+              <button id="skipWord" class="btn-secondary">Skip</button>
+              <span id="challengeProgress">1 / 10</span>
+              <button id="submitSentence" class="btn-primary">Submit</button>
+            </div>
+          </div>
+          <button id="exitWritingChallenge" class="btn-link">Exit Challenge</button>
+        </div>
       </section>
 
       <!-- Stats Tab -->
