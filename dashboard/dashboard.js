@@ -289,10 +289,6 @@ function renderVocabulary() {
       </div>
       <div class="vocabulary-card-header">
         <div class="word-title">${word.word}</div>
-        <div class="word-actions">
-          <button class="icon-btn" onclick="editWord('${word.id}')" title="Edit" aria-label="Edit word">✏️</button>
-          <button class="icon-btn" onclick="deleteWord('${word.id}')" title="Delete" aria-label="Delete word">🗑️</button>
-        </div>
       </div>
       ${word.definition ? `<div class="word-definition">${word.definition}</div>` : ''}
       ${examples.length > 0 ? `
@@ -336,17 +332,23 @@ function renderVocabulary() {
         </div>
       ` : ''}
       <div class="word-meta">
-        <div class="meta-item">
-          <span>👁️</span>
-          <span>Seen ${word.seenCount || 0}</span>
+        <div class="meta-items-left">
+          <div class="meta-item">
+            <span>👁️</span>
+            <span>Seen ${word.seenCount || 0}</span>
+          </div>
+          <div class="meta-item">
+            <span>✍️</span>
+            <span>Used ${word.usedCount || 0}</span>
+          </div>
+          <div class="meta-item">
+            <span>📅</span>
+            <span>${formatDate(word.addedDate)}</span>
+          </div>
         </div>
-        <div class="meta-item">
-          <span>✍️</span>
-          <span>Used ${word.usedCount || 0}</span>
-        </div>
-        <div class="meta-item">
-          <span>📅</span>
-          <span>${formatDate(word.addedDate)}</span>
+        <div class="word-actions">
+          <button class="icon-btn" onclick="editWord('${word.id}')" title="Edit" aria-label="Edit word">✏️</button>
+          <button class="icon-btn" onclick="deleteWord('${word.id}')" title="Delete" aria-label="Delete word">🗑️</button>
         </div>
       </div>
     </div>
