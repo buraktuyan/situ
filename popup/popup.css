@@ -357,7 +357,7 @@ body {
   gap: 8px;
 }
 
-.word-item {
+.situ-word-item {
   background: var(--white);
   border: 1px solid var(--gray-200);
   border-radius: 8px;
@@ -366,33 +366,33 @@ body {
   cursor: pointer;
 }
 
-.word-item:hover {
+.situ-word-item:hover {
   background: var(--primary-faint);
   border-color: var(--primary);
   transform: translateX(2px);
 }
 
-.word-item-header {
+.situ-word-item-header {
   display: flex;
   justify-content: space-between;
   align-items: start;
   margin-bottom: 4px;
 }
 
-.word-text {
+.situ-word-text {
   font-weight: 600;
   color: var(--primary);
   font-size: 15px;
 }
 
-.word-stats {
+.situ-word-stats {
   display: flex;
   gap: 8px;
   font-size: 11px;
   color: var(--gray-500);
 }
 
-.word-definition {
+.situ-word-definition {
   font-size: 13px;
   color: var(--gray-600);
   line-height: 1.4;
