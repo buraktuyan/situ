@@ -561,10 +561,16 @@
         recentWords: recentWords
       });
 
+      if (!response) {
+        console.error('No response received from background script');
+        updateSuggestionPanelWithError('Could not connect to extension. Please try again.');
+        return;
+      }
+
       if (response.success) {
         updateSuggestionPanelWithContent(response.suggestion, targetWords);
       } else {
-        updateSuggestionPanelWithError('Could not generate suggestions');
+        updateSuggestionPanelWithError(response.error || 'Could not generate suggestions');
       }
     } catch (error) {
       console.error('Error getting suggestions:', error);
