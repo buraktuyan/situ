@@ -212,7 +212,8 @@ async function handleMessage(message, sender, sendResponse) {
       case 'getWritingSuggestion':
         const suggestionResult = await AIHelper.getWritingSuggestion(
           message.text,
-          message.targetWords
+          message.targetWords,
+          message.recentWords
         );
         sendResponse(suggestionResult);
         break;

@@ -290,7 +290,29 @@
   border-left: 3px solid #6B46C1;
   color: #1F2937;
   line-height: 1.6;
-  white-space: pre-wrap;
+}
+
+/* HTML formatting support in suggestions */
+.situ-suggestion-text strong {
+  font-weight: 700;
+  color: #6B46C1;
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.situ-suggestion-text strong:first-child {
+  margin-top: 0;
+}
+
+.situ-suggestion-text p {
+  margin: 8px 0;
+}
+
+.situ-suggestion-text em {
+  font-style: italic;
+  color: #8B5CF6;
 }
 
 .situ-target-words-box {
