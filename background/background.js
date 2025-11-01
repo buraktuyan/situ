@@ -217,6 +217,14 @@ async function handleMessage(message, sender, sendResponse) {
         sendResponse(suggestionResult);
         break;
 
+      case 'evaluateWritingChallenge':
+        const evalResult = await AIHelper.evaluateWritingChallenge(
+          message.word,
+          message.sentence
+        );
+        sendResponse(evalResult);
+        break;
+
       case 'checkAIAvailability':
         const available = await AIHelper.checkAvailability();
         sendResponse({ success: true, available });

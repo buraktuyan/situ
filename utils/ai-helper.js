@@ -261,6 +261,24 @@ export class AIHelper {
   }
 
   /**
+   * Evaluate a writing challenge sentence
+   */
+  static async evaluateWritingChallenge(word, sentence) {
+    try {
+      const prompt = AI_PROMPTS.evaluateWritingChallenge(word, sentence);
+      const result = await this.prompt(prompt);
+
+      if (result.success) {
+        return { success: true, feedback: result.response.trim() };
+      }
+      return { success: false, error: result.error };
+    } catch (error) {
+      console.error('Error evaluating writing challenge:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Stream a prompt (for real-time responses)
    */
   static async *promptStreaming(text, options = {}) {

@@ -681,16 +681,69 @@ async function checkWritingSentence() {
   // Check if the word is used in the sentence (case-insensitive)
   const wordUsed = sentence.toLowerCase().includes(word.word.toLowerCase());
 
-  if (wordUsed) {
-    showChallengeFeedback('Great job! ✓', 'success');
+  if (!wordUsed) {
+    showChallengeFeedback(`Please make sure to use the word "${word.word}" in your sentence.`, 'error');
+    return;
+  }
 
-    // Increment used count
+  // Show loading feedback
+  showChallengeFeedback('Evaluating your sentence...', 'info');
+  submitSentence.disabled = true;
+
+  try {
+    // Use AI to evaluate the sentence
+    const response = await chrome.runtime.sendMessage({
+      action: 'evaluateWritingChallenge',
+      word: word.word,
+      sentence: sentence
+    });
+
+    if (response.success && response.feedback) {
+      // Show AI feedback
+      showChallengeFeedback(response.feedback, 'success');
+
+      // Increment used count
+      await chrome.runtime.sendMessage({
+        action: 'incrementUsedCount',
+        word: word.word
+      });
+
+      // Move to next word after a delay to let user read feedback
+      setTimeout(() => {
+        if (writingChallengeIndex < writingChallengeWords.length - 1) {
+          writingChallengeIndex++;
+          showWritingChallenge();
+        } else {
+          showCompletionMessage();
+        }
+      }, 3000);
+    } else {
+      // Fallback if AI is not available
+      showChallengeFeedback('Great job using the word! ✓', 'success');
+
+      await chrome.runtime.sendMessage({
+        action: 'incrementUsedCount',
+        word: word.word
+      });
+
+      setTimeout(() => {
+        if (writingChallengeIndex < writingChallengeWords.length - 1) {
+          writingChallengeIndex++;
+          showWritingChallenge();
+        } else {
+          showCompletionMessage();
+        }
+      }, 1500);
+    }
+  } catch (error) {
+    console.error('Error evaluating sentence:', error);
+    showChallengeFeedback('Great job using the word! ✓', 'success');
+
     await chrome.runtime.sendMessage({
       action: 'incrementUsedCount',
       word: word.word
     });
 
-    // Move to next word after a short delay
     setTimeout(() => {
       if (writingChallengeIndex < writingChallengeWords.length - 1) {
         writingChallengeIndex++;
@@ -698,9 +751,9 @@ async function checkWritingSentence() {
       } else {
         showCompletionMessage();
       }
-    }, 1000);
-  } else {
-    showChallengeFeedback(`Try using the word "${word.word}" in your sentence.`, 'error');
+    }, 1500);
+  } finally {
+    submitSentence.disabled = false;
   }
 }
 

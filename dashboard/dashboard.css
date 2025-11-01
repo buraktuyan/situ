@@ -1181,6 +1181,12 @@ body {
   border: 1px solid var(--error);
 }
 
+.challenge-feedback-info {
+  background: rgba(107, 70, 193, 0.1);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
 .challenge-controls {
   display: flex;
   justify-content: space-between;
