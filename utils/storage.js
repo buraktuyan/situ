@@ -148,6 +148,61 @@ export class StorageManager {
   }
 
   /**
+   * Increment seen count for a word (vocabulary only, no stats update)
+   * Used to avoid quota issues by batching stats separately
+   */
+  static async incrementSeenCountOnly(word) {
+    try {
+      const vocabulary = await this.getVocabulary();
+      const item = vocabulary.find(
+        v => v.word.toLowerCase() === word.toLowerCase()
+      );
+
+      if (item) {
+        item.seenCount++;
+        item.lastSeen = Date.now();
+        await chrome.storage.sync.set({ [STORAGE_KEYS.VOCABULARY]: vocabulary });
+      }
+    } catch (error) {
+      console.error('Error incrementing seen count:', error);
+    }
+  }
+
+  /**
+   * Batch update stats (used to avoid quota issues)
+   */
+  static async batchUpdateStats(updates) {
+    try {
+      const stats = await this.getStats();
+      const today = new Date().toISOString().split('T')[0];
+
+      if (!stats.dailyStats[today]) {
+        stats.dailyStats[today] = { seen: 0, used: 0, added: 0 };
+      }
+
+      // Apply batched updates
+      if (updates.wordsSeen) {
+        stats.wordsSeen = (stats.wordsSeen || 0) + updates.wordsSeen;
+        stats.dailyStats[today].seen += updates.wordsSeen;
+      }
+
+      if (updates.wordsUsed) {
+        stats.wordsUsed = (stats.wordsUsed || 0) + updates.wordsUsed;
+        stats.dailyStats[today].used += updates.wordsUsed;
+      }
+
+      if (updates.wordsAdded) {
+        stats.wordsAdded = (stats.wordsAdded || 0) + updates.wordsAdded;
+        stats.dailyStats[today].added += updates.wordsAdded;
+      }
+
+      await chrome.storage.sync.set({ [STORAGE_KEYS.STATS]: stats });
+    } catch (error) {
+      console.error('Error batch updating stats:', error);
+    }
+  }
+
+  /**
    * Increment used count for a word
    */
   static async incrementUsedCount(word) {
