@@ -10,11 +10,28 @@
   <div class="container">
     <!-- Header -->
     <header class="header">
-      <h1 class="logo">
-        <span class="logo-icon">📚</span>
-        Situ
-      </h1>
-      <p class="tagline">Learn vocabulary while browsing</p>
+      <div class="header-title">
+        <h1 class="logo">Situ</h1>
+        <p class="tagline">Learn vocabulary while browsing</p>
+      </div>
+
+      <!-- Mode Toggles -->
+      <div class="header-modes">
+        <div class="mode-toggle">
+          <label class="toggle-label">
+            <span class="toggle-text">Reading Mode</span>
+            <input type="checkbox" id="readingModeToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="mode-toggle">
+          <label class="toggle-label">
+            <span class="toggle-text">Writing Mode</span>
+            <input type="checkbox" id="writingModeToggle" />
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
     </header>
 
     <!-- Quick Stats -->
@@ -30,30 +47,6 @@
       <div class="stat-card">
         <div class="stat-value" id="usedToday">0</div>
         <div class="stat-label">Used Today</div>
-      </div>
-    </section>
-
-    <!-- Mode Toggles -->
-    <section class="modes">
-      <div class="mode-toggle">
-        <label class="toggle-label">
-          <input type="checkbox" id="readingModeToggle" />
-          <span class="toggle-slider"></span>
-          <span class="toggle-text">
-            <span class="toggle-icon">👁️</span>
-            Reading Mode
-          </span>
-        </label>
-      </div>
-      <div class="mode-toggle">
-        <label class="toggle-label">
-          <input type="checkbox" id="writingModeToggle" />
-          <span class="toggle-slider"></span>
-          <span class="toggle-text">
-            <span class="toggle-icon">✍️</span>
-            Writing Mode
-          </span>
-        </label>
       </div>
     </section>
 
@@ -87,20 +80,20 @@
       </div>
     </section>
 
-    <!-- AI Status -->
-    <section class="ai-status" id="aiStatus">
-      <div class="ai-indicator">
-        <span class="ai-dot"></span>
-        <span class="ai-text">Checking AI availability...</span>
-      </div>
-    </section>
-
     <!-- Action Buttons -->
     <section class="actions">
       <button id="dashboardBtn" class="btn-secondary">
         <span class="btn-icon">⚙️</span>
         Dashboard
       </button>
+    </section>
+
+    <!-- AI Status -->
+    <section class="ai-status" id="aiStatus">
+      <div class="ai-indicator">
+        <span class="ai-dot"></span>
+        <span class="ai-text">Checking AI availability...</span>
+      </div>
     </section>
   </div>
 
