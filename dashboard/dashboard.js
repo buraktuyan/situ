@@ -290,7 +290,8 @@ function renderVocabulary() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // Format date
