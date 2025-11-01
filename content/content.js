@@ -139,7 +139,7 @@
       }
 
       // Create highlight element
-      const highlight = createHighlightElement(matchText);
+      const highlight = createHighlightElement(matchText, textNode);
       fragment.appendChild(highlight);
 
       lastIndex = matchIndex + matchText.length;
@@ -156,7 +156,7 @@
     textNode.parentNode.replaceChild(fragment, textNode);
   }
 
-  function createHighlightElement(word) {
+  function createHighlightElement(word, textNode) {
     const span = document.createElement('span');
     span.className = 'situ-highlight';
     span.textContent = word;
@@ -173,6 +173,17 @@
       action: 'incrementSeenCount',
       word: word
     });
+
+    // Extract and store the sentence for recently seen
+    const sentence = extractSentenceFromNode(textNode, word);
+    if (sentence) {
+      chrome.runtime.sendMessage({
+        action: 'addRecentlySeen',
+        word: word,
+        sentence: sentence,
+        url: window.location.href
+      });
+    }
 
     return span;
   }
@@ -232,6 +243,9 @@
 
     const panel = document.createElement('div');
     panel.className = 'situ-word-details';
+
+    const recentlySeen = vocabItem.recentlySeen || [];
+
     panel.innerHTML = `
       <div class="situ-detail-header">
         <h3>${vocabItem.word}</h3>
@@ -243,6 +257,22 @@
           <div class="examples">
             <strong>Examples:</strong>
             <ul>${vocabItem.examples.map(ex => `<li>${ex}</li>`).join('')}</ul>
+          </div>
+        ` : ''}
+        ${recentlySeen.length > 0 ? `
+          <div class="examples">
+            <strong>Recently Seen:</strong>
+            <ul>${recentlySeen.map(entry => {
+              let html = `<li>${entry.sentence}`;
+              try {
+                const domain = new URL(entry.url).hostname.replace('www.', '');
+                html += `<br><a href="${entry.url}" target="_blank" style="font-size: 0.9em; color: #6B46C1;">📎 ${domain}</a>`;
+              } catch (e) {
+                // Invalid URL, skip link
+              }
+              html += `</li>`;
+              return html;
+            }).join('')}</ul>
           </div>
         ` : ''}
         ${vocabItem.synonyms?.length > 0 ? `
@@ -554,6 +584,49 @@
     }
     return true; // Keep message channel open for async response
   });
+
+  /**
+   * Extract the sentence containing a specific word from a text node
+   */
+  function extractSentenceFromNode(textNode, word) {
+    try {
+      // Get the full text from the text node and parent context
+      let fullText = textNode.textContent || '';
+
+      // If text is too short, get more context from parent
+      if (fullText.length < 100 && textNode.parentElement) {
+        fullText = textNode.parentElement.textContent || fullText;
+      }
+
+      // If still too short, try grandparent
+      if (fullText.length < 100 && textNode.parentElement?.parentElement) {
+        fullText = textNode.parentElement.parentElement.textContent || fullText;
+      }
+
+      // Find sentences containing the word
+      const sentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
+
+      // Return first sentence containing the word
+      for (const sentence of sentences) {
+        if (sentence.toLowerCase().includes(word.toLowerCase())) {
+          return sentence.trim();
+        }
+      }
+
+      // If no sentence found with punctuation, return a chunk around the word
+      const wordIndex = fullText.toLowerCase().indexOf(word.toLowerCase());
+      if (wordIndex !== -1) {
+        const start = Math.max(0, wordIndex - 50);
+        const end = Math.min(fullText.length, wordIndex + word.length + 100);
+        return fullText.substring(start, end).trim();
+      }
+
+      return fullText.substring(0, 200).trim();
+    } catch (error) {
+      console.error('Error extracting sentence from node:', error);
+      return null;
+    }
+  }
 
   /**
    * Extract the sentence containing a specific word from the selected text

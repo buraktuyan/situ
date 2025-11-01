@@ -169,6 +169,11 @@ async function handleMessage(message, sender, sendResponse) {
         sendResponse({ success: true });
         break;
 
+      case 'addRecentlySeen':
+        await StorageManager.addRecentlySeen(message.word, message.sentence, message.url);
+        sendResponse({ success: true });
+        break;
+
       case 'enrichWord':
         const aiAvailable = await AIHelper.checkAvailability();
         if (aiAvailable) {
