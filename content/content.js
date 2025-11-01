@@ -12,6 +12,8 @@
   let seenWordsThisSession = new Set(); // Track words seen this session
   let pendingStatUpdates = { wordsSeen: 0 }; // Batch stat updates
   let statsUpdateTimeout = null;
+  let pendingWordUpdates = []; // Batch word tracking updates
+  let wordUpdateTimeout = null;
 
   // Initialize
   async function initialize() {
@@ -186,26 +188,25 @@
     if (!seenWordsThisSession.has(wordKey)) {
       seenWordsThisSession.add(wordKey);
 
-      // Increment vocabulary item seen count immediately (single write)
-      chrome.runtime.sendMessage({
-        action: 'incrementSeenCountOnly',
-        word: word
+      // Extract sentence for context
+      const sentence = extractSentenceFromNode(textNode, word);
+
+      // Queue word tracking update (batched to avoid quota issues)
+      pendingWordUpdates.push({
+        word: word,
+        incrementSeen: true,
+        recentlySeen: sentence ? {
+          sentence: sentence,
+          url: window.location.href
+        } : null
       });
+
+      // Schedule batched word tracking update
+      scheduleWordTrackingUpdate();
 
       // Batch stat updates to avoid quota issues
       pendingStatUpdates.wordsSeen++;
       scheduleStatsUpdate();
-    }
-
-    // Extract and store the sentence for recently seen
-    const sentence = extractSentenceFromNode(textNode, word);
-    if (sentence) {
-      chrome.runtime.sendMessage({
-        action: 'addRecentlySeen',
-        word: word,
-        sentence: sentence,
-        url: window.location.href
-      });
     }
 
     return span;
@@ -380,9 +381,39 @@
     statsUpdateTimeout = null;
   }
 
-  // Flush stats on page unload
+  // ============ WORD TRACKING BATCHING ============
+
+  function scheduleWordTrackingUpdate() {
+    // Clear existing timeout
+    if (wordUpdateTimeout) {
+      clearTimeout(wordUpdateTimeout);
+    }
+
+    // Schedule batched update after 2 seconds of inactivity
+    // (shorter than stats to ensure timely updates)
+    wordUpdateTimeout = setTimeout(() => {
+      flushWordTrackingUpdates();
+    }, 2000);
+  }
+
+  function flushWordTrackingUpdates() {
+    if (pendingWordUpdates.length > 0) {
+      chrome.runtime.sendMessage({
+        action: 'batchUpdateWordTracking',
+        updates: [...pendingWordUpdates]
+      });
+
+      // Reset pending updates
+      pendingWordUpdates = [];
+    }
+
+    wordUpdateTimeout = null;
+  }
+
+  // Flush all pending updates on page unload
   window.addEventListener('beforeunload', () => {
     flushStatsUpdates();
+    flushWordTrackingUpdates();
   });
 
   // ============ WRITING MODE ============

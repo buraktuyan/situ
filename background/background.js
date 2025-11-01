@@ -174,6 +174,11 @@ async function handleMessage(message, sender, sendResponse) {
         sendResponse({ success: true });
         break;
 
+      case 'batchUpdateWordTracking':
+        await StorageManager.batchUpdateWordTracking(message.updates);
+        sendResponse({ success: true });
+        break;
+
       case 'incrementUsedCount':
         await StorageManager.incrementUsedCount(message.word);
         sendResponse({ success: true });
