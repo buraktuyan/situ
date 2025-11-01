@@ -404,6 +404,70 @@ export class StorageManager {
   }
 
   /**
+   * Batch update multiple words' tracking data in a single write
+   * This prevents quota exceeded errors by reducing write operations
+   */
+  static async batchUpdateWordTracking(updates) {
+    try {
+      const vocabulary = await this.getVocabulary();
+
+      // Process each update
+      updates.forEach(update => {
+        const item = vocabulary.find(
+          v => v.word.toLowerCase() === update.word.toLowerCase()
+        );
+
+        if (item) {
+          // Update seen count if provided
+          if (update.incrementSeen) {
+            item.seenCount++;
+            item.lastSeen = Date.now();
+          }
+
+          // Add recently seen entry if provided
+          if (update.recentlySeen) {
+            const { sentence, url } = update.recentlySeen;
+
+            // Initialize recentlySeen array if it doesn't exist
+            if (!item.recentlySeen) {
+              item.recentlySeen = [];
+            }
+
+            // Check if this URL is already in the recently seen list
+            const existingIndex = item.recentlySeen.findIndex(entry => entry.url === url);
+
+            // If same webpage, update existing entry instead of adding new one
+            if (existingIndex !== -1) {
+              item.recentlySeen[existingIndex] = {
+                sentence,
+                url,
+                timestamp: Date.now()
+              };
+            } else {
+              // Add new entry
+              item.recentlySeen.unshift({
+                sentence,
+                url,
+                timestamp: Date.now()
+              });
+
+              // Keep only last 3 entries from different pages
+              if (item.recentlySeen.length > 3) {
+                item.recentlySeen = item.recentlySeen.slice(0, 3);
+              }
+            }
+          }
+        }
+      });
+
+      // Single write operation for all updates
+      await chrome.storage.sync.set({ [STORAGE_KEYS.VOCABULARY]: vocabulary });
+    } catch (error) {
+      console.error('Error batch updating word tracking:', error);
+    }
+  }
+
+  /**
    * Clear all data (with confirmation)
    */
   static async clearAllData() {
