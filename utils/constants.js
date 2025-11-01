@@ -61,13 +61,19 @@ export const CONTEXT_MENU_ID = 'situ-add-word';
 
 export const AI_PROMPTS = {
   getDefinition: (word) =>
-    `Provide a clear, concise definition of the word "${word}" suitable for an ESL student. Keep it under 50 words.`,
+    `Provide a clear, concise definition of "${word}" in one sentence. Keep it simple and under 30 words.`,
 
   getExample: (word) =>
-    `Generate a natural, practical example sentence using the word "${word}" that an ESL student would find helpful. Make it relevant to everyday situations.`,
+    `Generate ONE natural, practical example sentence using "${word}". Make it relevant to everyday situations. Return ONLY the sentence, nothing else.`,
+
+  getMultipleExamples: (word, count = 3, proficiency = 'intermediate') =>
+    `Generate exactly ${count} natural, practical example sentences using "${word}". Make them appropriate for ${proficiency} level learners and relevant to everyday situations. Return ONLY the sentences, one per line, without numbering or explanations.`,
 
   getSynonyms: (word) =>
-    `List 3-5 common synonyms for "${word}" that an intermediate ESL student should know.`,
+    `List 3-5 common synonyms for "${word}". Return as comma-separated values only.`,
+
+  getDifficulty: (word) =>
+    `Evaluate the difficulty level of the word/phrase "${word}" for English language learners. Respond with ONLY one word: "beginner", "intermediate", or "advanced". Consider: word frequency, complexity, and common usage.`,
 
   getContextualSuggestion: (text, targetWords) =>
     `Given this text: "${text}"\n\nSuggest how to naturally incorporate one of these vocabulary words: ${targetWords.join(', ')}. Provide the complete rewritten sentence.`

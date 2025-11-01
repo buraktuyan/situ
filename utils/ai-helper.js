@@ -175,28 +175,87 @@ export class AIHelper {
   }
 
   /**
-   * Enrich word data with AI
-   * Gets definition, example, and synonyms in one go
+   * Get multiple example sentences for a word
    */
-  static async enrichWord(word) {
+  static async getMultipleExamples(word, count = 3, proficiency = 'intermediate') {
     try {
-      const [defResult, exampleResult, synonymsResult] = await Promise.all([
+      const prompt = AI_PROMPTS.getMultipleExamples(word, count, proficiency);
+      const result = await this.prompt(prompt);
+
+      if (result.success) {
+        // Parse the response to extract examples
+        const examples = result.response
+          .split('\n')
+          .map(s => s.trim())
+          .filter(s => s.length > 0)
+          .slice(0, count); // Ensure we only get the requested count
+
+        return { success: true, examples };
+      }
+      return { success: false, error: result.error };
+    } catch (error) {
+      console.error('Error getting multiple examples:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Evaluate word difficulty
+   */
+  static async getDifficulty(word) {
+    try {
+      const prompt = AI_PROMPTS.getDifficulty(word);
+      const result = await this.prompt(prompt);
+
+      if (result.success) {
+        const difficulty = result.response.trim().toLowerCase();
+        // Validate the response
+        if (['beginner', 'intermediate', 'advanced'].includes(difficulty)) {
+          return { success: true, difficulty };
+        }
+        // Default to intermediate if invalid response
+        return { success: true, difficulty: 'intermediate' };
+      }
+      return { success: false, error: result.error };
+    } catch (error) {
+      console.error('Error getting difficulty:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Enrich word data with AI
+   * Gets definition, examples, synonyms, and difficulty in one go
+   */
+  static async enrichWord(word, proficiency = 'intermediate', sourceSentence = null) {
+    try {
+      const [defResult, examplesResult, synonymsResult, difficultyResult] = await Promise.all([
         this.getDefinition(word),
-        this.getExample(word),
-        this.getSynonyms(word)
+        this.getMultipleExamples(word, 3, proficiency),
+        this.getSynonyms(word),
+        this.getDifficulty(word)
       ]);
+
+      let examples = examplesResult.success ? examplesResult.examples : [];
+
+      // If there's a source sentence, use it as the first example
+      if (sourceSentence && sourceSentence.trim()) {
+        examples = [sourceSentence, ...examples].slice(0, 3);
+      }
 
       return {
         definition: defResult.success ? defResult.definition : '',
-        examples: exampleResult.success ? [exampleResult.example] : [],
-        synonyms: synonymsResult.success ? synonymsResult.synonyms : []
+        examples: examples,
+        synonyms: synonymsResult.success ? synonymsResult.synonyms : [],
+        difficulty: difficultyResult.success ? difficultyResult.difficulty : 'intermediate'
       };
     } catch (error) {
       console.error('Error enriching word:', error);
       return {
         definition: '',
         examples: [],
-        synonyms: []
+        synonyms: [],
+        difficulty: 'intermediate'
       };
     }
   }

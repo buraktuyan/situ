@@ -292,33 +292,25 @@
       <div class="modal-body">
         <div class="form-group">
           <label for="wordInput">Word or Phrase *</label>
-          <input type="text" id="wordInput" required />
+          <input type="text" id="wordInput" required placeholder="Enter word or phrase..." />
         </div>
-        <div class="form-group">
-          <label for="definitionInput">Definition</label>
-          <textarea id="definitionInput" rows="3"></textarea>
-          <button id="getDefinitionBtn" class="btn-link-small">Get AI Definition</button>
+        <div id="wordProcessingStatus" class="word-processing-status" style="display: none;">
+          <div class="spinner-large"></div>
+          <p>Generating definition and examples...</p>
         </div>
-        <div class="form-group">
-          <label for="examplesInput">Examples (one per line)</label>
-          <textarea id="examplesInput" rows="3" placeholder="Enter example sentences..."></textarea>
-          <button id="getExampleBtn" class="btn-link-small">Get AI Example</button>
-        </div>
-        <div class="form-group">
-          <label for="synonymsInput">Synonyms (comma separated)</label>
-          <input type="text" id="synonymsInput" placeholder="word1, word2, word3" />
-        </div>
-        <div class="form-group">
-          <label for="difficultyInput">Difficulty Level</label>
-          <select id="difficultyInput">
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="notesInput">Notes</label>
-          <textarea id="notesInput" rows="2"></textarea>
+        <div id="wordPreview" class="word-preview" style="display: none;">
+          <div class="preview-section">
+            <h4>Definition</h4>
+            <p id="previewDefinition"></p>
+          </div>
+          <div class="preview-section">
+            <h4>Examples</h4>
+            <ul id="previewExamples"></ul>
+          </div>
+          <div class="preview-section">
+            <h4>Difficulty</h4>
+            <span id="previewDifficulty" class="difficulty-badge"></span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
