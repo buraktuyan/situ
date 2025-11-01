@@ -425,11 +425,17 @@ body {
 
 .word-meta {
   display: flex;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
   padding-top: 12px;
   border-top: 1px solid var(--gray-200);
   font-size: 13px;
   color: var(--gray-500);
+}
+
+.meta-items-left {
+  display: flex;
+  gap: 16px;
 }
 
 .meta-item {
