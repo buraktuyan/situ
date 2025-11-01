@@ -412,10 +412,15 @@
     const button = createSuggestionButton(field);
 
     field.addEventListener('focus', () => {
+      updateButtonVisibility(field, button);
       if (button && !document.body.contains(button)) {
         positionSuggestionButton(field, button);
         document.body.appendChild(button);
       }
+    });
+
+    field.addEventListener('input', () => {
+      updateButtonVisibility(field, button);
     });
 
     field.addEventListener('blur', () => {
@@ -432,7 +437,7 @@
   function createSuggestionButton(field) {
     const button = document.createElement('button');
     button.className = 'situ-suggest-button';
-    button.innerHTML = '✨ Enrich';
+    button.innerHTML = '✨ Enhance';
     button.title = 'Get vocabulary suggestions';
     button.setAttribute('aria-label', 'Get vocabulary suggestions');
 
@@ -443,6 +448,15 @@
     });
 
     return button;
+  }
+
+  function updateButtonVisibility(field, button) {
+    const text = field.value || field.textContent || '';
+    if (!text.trim()) {
+      button.style.display = 'none';
+    } else {
+      button.style.display = 'block';
+    }
   }
 
   function positionSuggestionButton(field, button) {
@@ -471,8 +485,8 @@
       return;
     }
 
-    // Show loading
-    showNotification('Getting suggestions...', 'info');
+    // Show panel with loading state immediately
+    showSuggestionPanelLoading(field, targetWords);
 
     try {
       const response = await chrome.runtime.sendMessage({
@@ -482,53 +496,117 @@
       });
 
       if (response.success) {
-        showSuggestionPanel(field, response.suggestion, targetWords);
+        updateSuggestionPanelWithContent(response.suggestion, targetWords);
       } else {
-        showNotification('Could not generate suggestions', 'error');
+        updateSuggestionPanelWithError('Could not generate suggestions');
       }
     } catch (error) {
       console.error('Error getting suggestions:', error);
-      showNotification('Error getting suggestions', 'error');
+      updateSuggestionPanelWithError('Error getting suggestions');
     }
   }
 
-  function showSuggestionPanel(field, suggestion, targetWords) {
+  function showSuggestionPanelLoading(field, targetWords) {
     // Remove existing panel
     removeSuggestionPanel();
 
     const panel = document.createElement('div');
     panel.className = 'situ-suggestion-panel';
+    panel.setAttribute('data-field-id', Math.random().toString(36));
     panel.innerHTML = `
       <div class="situ-panel-header">
-        <h4>💡 Vocabulary Suggestion</h4>
+        <h4>✨ Writing Suggestions</h4>
         <button class="situ-panel-close" aria-label="Close">&times;</button>
       </div>
       <div class="situ-panel-content">
-        <p class="suggestion-text">${suggestion}</p>
-        <p class="target-words">Using: ${targetWords.join(', ')}</p>
-      </div>
-      <div class="situ-panel-actions">
-        <button class="situ-btn-secondary" data-action="dismiss">Dismiss</button>
-        <button class="situ-btn-primary" data-action="apply">Apply</button>
+        <div class="situ-loading-container">
+          <div class="situ-spinner"></div>
+          <p class="situ-loading-text">Generating suggestions...</p>
+        </div>
+        <div class="situ-suggestion-content" style="display: none;"></div>
       </div>
     `;
 
     document.body.appendChild(panel);
 
+    // Store field reference
+    panel._field = field;
+
     // Position panel
     const rect = field.getBoundingClientRect();
     panel.style.position = 'fixed';
-    panel.style.top = `${Math.min(rect.bottom + 10, window.innerHeight - panel.offsetHeight - 20)}px`;
+    panel.style.top = `${Math.min(rect.bottom + 10, window.innerHeight - 300)}px`;
     panel.style.left = `${Math.max(20, rect.left)}px`;
     panel.style.maxWidth = `${Math.min(500, rect.width)}px`;
 
     // Event handlers
     panel.querySelector('.situ-panel-close').addEventListener('click', removeSuggestionPanel);
-    panel.querySelector('[data-action="dismiss"]').addEventListener('click', removeSuggestionPanel);
-    panel.querySelector('[data-action="apply"]').addEventListener('click', () => {
-      applySuggestion(field, suggestion);
-      removeSuggestionPanel();
-    });
+  }
+
+  function updateSuggestionPanelWithContent(suggestion, targetWords) {
+    const panel = document.querySelector('.situ-suggestion-panel');
+    if (!panel) return;
+
+    const loadingContainer = panel.querySelector('.situ-loading-container');
+    const contentContainer = panel.querySelector('.situ-suggestion-content');
+
+    if (loadingContainer) loadingContainer.style.display = 'none';
+    if (contentContainer) {
+      contentContainer.style.display = 'block';
+      contentContainer.innerHTML = `
+        <div class="situ-suggestion-box">
+          <div class="situ-suggestion-label">Suggested text:</div>
+          <div class="situ-suggestion-text">${escapeHtml(suggestion)}</div>
+        </div>
+        <div class="situ-target-words-box">
+          <div class="situ-target-label">Using vocabulary:</div>
+          <div class="situ-target-chips">
+            ${targetWords.map(word => `<span class="situ-word-chip">${escapeHtml(word)}</span>`).join('')}
+          </div>
+        </div>
+        <div class="situ-panel-actions">
+          <button class="situ-btn-secondary" data-action="dismiss">Dismiss</button>
+          <button class="situ-btn-primary" data-action="apply">Apply</button>
+        </div>
+      `;
+
+      // Add event handlers for buttons
+      const field = panel._field;
+      contentContainer.querySelector('[data-action="dismiss"]').addEventListener('click', removeSuggestionPanel);
+      contentContainer.querySelector('[data-action="apply"]').addEventListener('click', () => {
+        applySuggestion(field, suggestion);
+        removeSuggestionPanel();
+      });
+    }
+  }
+
+  function updateSuggestionPanelWithError(errorMessage) {
+    const panel = document.querySelector('.situ-suggestion-panel');
+    if (!panel) return;
+
+    const loadingContainer = panel.querySelector('.situ-loading-container');
+    const contentContainer = panel.querySelector('.situ-suggestion-content');
+
+    if (loadingContainer) loadingContainer.style.display = 'none';
+    if (contentContainer) {
+      contentContainer.style.display = 'block';
+      contentContainer.innerHTML = `
+        <div class="situ-error-message">
+          <p>⚠️ ${escapeHtml(errorMessage)}</p>
+        </div>
+        <div class="situ-panel-actions">
+          <button class="situ-btn-secondary" data-action="dismiss">Close</button>
+        </div>
+      `;
+
+      contentContainer.querySelector('[data-action="dismiss"]').addEventListener('click', removeSuggestionPanel);
+    }
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   function applySuggestion(field, suggestion) {

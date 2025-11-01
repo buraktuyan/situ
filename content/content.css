@@ -228,20 +228,107 @@
   color: #1F2937;
   font-size: 14px;
   line-height: 1.6;
+  min-height: 120px;
 }
 
-.situ-panel-content .suggestion-text {
-  margin-bottom: 12px;
+/* Loading state */
+.situ-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  gap: 12px;
+}
+
+.situ-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #6B46C1;
+  border-radius: 50%;
+  animation: situ-spin 0.8s linear infinite;
+}
+
+.situ-loading-text {
+  margin: 0;
+  color: #6B7280;
+  font-size: 14px;
+}
+
+@keyframes situ-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Suggestion content */
+.situ-suggestion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.situ-suggestion-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.situ-suggestion-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.situ-suggestion-text {
   padding: 12px;
   background: #F9FAFB;
   border-radius: 6px;
   border-left: 3px solid #6B46C1;
+  color: #1F2937;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
-.situ-panel-content .target-words {
+.situ-target-words-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.situ-target-label {
   font-size: 12px;
+  font-weight: 600;
   color: #6B7280;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.situ-target-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.situ-word-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, #6B46C1 0%, #8B5CF6 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.situ-error-message {
+  padding: 16px;
+  background: #FEE2E2;
+  border-left: 3px solid #EF4444;
+  border-radius: 6px;
+  color: #991B1B;
 }
 
 .situ-panel-actions {

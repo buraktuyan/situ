@@ -76,7 +76,23 @@ export const AI_PROMPTS = {
     `Evaluate the difficulty level of the word/phrase "${word}" for English language learners. Respond with ONLY one word: "beginner", "intermediate", or "advanced". Consider: word frequency, complexity, and common usage.`,
 
   getContextualSuggestion: (text, targetWords) =>
-    `Given this text: "${text}"\n\nSuggest how to naturally incorporate one of these vocabulary words: ${targetWords.join(', ')}. Provide the complete rewritten sentence.`
+    `Given this text: "${text}"\n\nSuggest how to naturally incorporate one of these vocabulary words: ${targetWords.join(', ')}. Provide the complete rewritten sentence.`,
+
+  evaluateWritingChallenge: (word, sentence) =>
+    `You are a helpful and experienced ESL teacher providing supportive feedback on student writing.
+
+The student was asked to write a sentence using the word "${word}".
+They wrote: "${sentence}"
+
+Please evaluate their sentence and provide warm, constructive feedback. Consider:
+1. Did they use the word correctly?
+2. Is the sentence grammatically correct?
+3. Is the word used in an appropriate context?
+4. Any suggestions for improvement?
+
+Keep your feedback encouraging and supportive (2-3 sentences max). If they did well, celebrate it! If there are issues, gently point them out with specific suggestions.
+
+Format your response as plain text without any special formatting or markdown.`
 };
 
 export const MAX_VOCABULARY_SIZE = 1000;
