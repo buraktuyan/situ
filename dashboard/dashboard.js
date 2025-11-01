@@ -76,6 +76,9 @@ async function initialize() {
   renderStats();
   populateSettings();
   setupEventListeners();
+
+  // Check if we need to highlight a specific word (from popup)
+  await handleSelectedWord();
 }
 
 // Load all data
@@ -100,6 +103,43 @@ async function loadAllData() {
     }
   } catch (error) {
     console.error('Error loading data:', error);
+  }
+}
+
+// Handle selected word from popup
+async function handleSelectedWord() {
+  try {
+    const result = await chrome.storage.local.get('selectedWordId');
+    const wordId = result.selectedWordId;
+
+    if (wordId) {
+      // Switch to vocabulary tab
+      switchTab('vocabulary');
+
+      // Wait for the DOM to update
+      setTimeout(() => {
+        // Find the card
+        const card = document.querySelector(`[data-word-id="${wordId}"]`);
+
+        if (card) {
+          // Scroll to the card
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          // Add highlight effect
+          card.style.animation = 'highlight-pulse 2s ease-in-out';
+
+          // Remove animation after it completes
+          setTimeout(() => {
+            card.style.animation = '';
+          }, 2000);
+        }
+
+        // Clear the selectedWordId
+        chrome.storage.local.remove('selectedWordId');
+      }, 100);
+    }
+  } catch (error) {
+    console.error('Error handling selected word:', error);
   }
 }
 
@@ -242,7 +282,7 @@ function renderVocabulary() {
     const hasSource = word.sourceUrl && word.sourceSentence;
 
     return `
-    <div class="vocabulary-card">
+    <div class="vocabulary-card" data-word-id="${word.id}">
       <div class="difficulty-badge difficulty-${word.difficulty || 'intermediate'}">
         ${(word.difficulty || 'intermediate').toUpperCase()}
       </div>

@@ -972,6 +972,17 @@ body {
   to { transform: rotate(360deg); }
 }
 
+@keyframes highlight-pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(107, 70, 193, 0.1);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(107, 70, 193, 0.5);
+    transform: scale(1.02);
+  }
+}
+
 /* Word Preview */
 .word-preview {
   margin-top: 20px;

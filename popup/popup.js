@@ -122,10 +122,10 @@ function renderRecentWords() {
     return;
   }
 
-  // Sort by most recently added and take first 5
+  // Sort by most recently added and take first 3
   const recentWords = [...vocabulary]
     .sort((a, b) => b.addedDate - a.addedDate)
-    .slice(0, 5);
+    .slice(0, 3);
 
   recentWordsList.innerHTML = recentWords.map(word => `
     <div class="word-item" data-word-id="${word.id}">
