@@ -280,6 +280,7 @@ function renderVocabulary() {
   vocabularyList.innerHTML = filtered.map(word => {
     const examples = word.examples || [];
     const hasSource = word.sourceUrl && word.sourceSentence;
+    const recentlySeen = word.recentlySeen || [];
 
     return `
     <div class="vocabulary-card" data-word-id="${word.id}">
@@ -308,6 +309,25 @@ function renderVocabulary() {
                 } catch (e) {
                   // Invalid URL, skip link
                 }
+              }
+              html += `</li>`;
+              return html;
+            }).join('')}
+          </ul>
+        </div>
+      ` : ''}
+      ${recentlySeen.length > 0 ? `
+        <div class="word-examples">
+          <div class="word-examples-title">Recently Seen</div>
+          <ul>
+            ${recentlySeen.map(entry => {
+              let html = `<li>${entry.sentence}`;
+              // Add source link
+              try {
+                const domain = new URL(entry.url).hostname.replace('www.', '');
+                html += `<br><a href="${entry.url}" target="_blank" class="source-link" title="View source">📎 ${domain}</a>`;
+              } catch (e) {
+                // Invalid URL, skip link
               }
               html += `</li>`;
               return html;

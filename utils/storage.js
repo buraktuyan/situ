@@ -19,7 +19,8 @@ import { STORAGE_KEYS, DEFAULT_SETTINGS, MAX_VOCABULARY_SIZE } from './constants
  *   notes: string,
  *   tags: string[],
  *   sourceUrl: string (URL where word was found, if added via context menu),
- *   sourceSentence: string (original sentence where word was found)
+ *   sourceSentence: string (original sentence where word was found),
+ *   recentlySeen: Array<{sentence: string, url: string, timestamp: number}> (last 3 occurrences from different pages)
  * }
  */
 
@@ -72,7 +73,8 @@ export class StorageManager {
         notes: wordData.notes || '',
         tags: wordData.tags || [],
         sourceUrl: wordData.sourceUrl || '',
-        sourceSentence: wordData.sourceSentence || ''
+        sourceSentence: wordData.sourceSentence || '',
+        recentlySeen: []
       };
 
       vocabulary.push(newWord);
@@ -219,6 +221,53 @@ export class StorageManager {
       }
     } catch (error) {
       console.error('Error incrementing used count:', error);
+    }
+  }
+
+  /**
+   * Add a recently seen entry for a word
+   */
+  static async addRecentlySeen(word, sentence, url) {
+    try {
+      const vocabulary = await this.getVocabulary();
+      const item = vocabulary.find(
+        v => v.word.toLowerCase() === word.toLowerCase()
+      );
+
+      if (item) {
+        // Initialize recentlySeen array if it doesn't exist
+        if (!item.recentlySeen) {
+          item.recentlySeen = [];
+        }
+
+        // Check if this URL is already in the recently seen list
+        const existingIndex = item.recentlySeen.findIndex(entry => entry.url === url);
+
+        // If same webpage, update existing entry instead of adding new one
+        if (existingIndex !== -1) {
+          item.recentlySeen[existingIndex] = {
+            sentence,
+            url,
+            timestamp: Date.now()
+          };
+        } else {
+          // Add new entry
+          item.recentlySeen.unshift({
+            sentence,
+            url,
+            timestamp: Date.now()
+          });
+
+          // Keep only last 3 entries from different pages
+          if (item.recentlySeen.length > 3) {
+            item.recentlySeen = item.recentlySeen.slice(0, 3);
+          }
+        }
+
+        await chrome.storage.sync.set({ [STORAGE_KEYS.VOCABULARY]: vocabulary });
+      }
+    } catch (error) {
+      console.error('Error adding recently seen:', error);
     }
   }
 
