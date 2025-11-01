@@ -166,7 +166,7 @@ async function addWord() {
 
   // Disable button
   addWordBtn.disabled = true;
-  showStatus('Adding word...', 'info');
+  showStatus('Adding word...', 'info', true);
 
   try {
     // Check if AI is available for enrichment
@@ -177,7 +177,7 @@ async function addWord() {
 
     // Enrich with AI if available
     if (aiAvailable) {
-      showStatus('Enriching with AI...', 'info');
+      showStatus('Generating definition and examples...', 'info', true);
       const enrichResponse = await chrome.runtime.sendMessage({
         action: 'enrichWord',
         word: word
@@ -222,9 +222,14 @@ async function addWord() {
 }
 
 // Show status message
-function showStatus(message, type = 'info') {
-  addWordStatus.textContent = message;
+function showStatus(message, type = 'info', showSpinner = false) {
   addWordStatus.className = `status-message ${type}`;
+
+  if (showSpinner && type === 'info') {
+    addWordStatus.innerHTML = `<div class="spinner"></div><span>${message}</span>`;
+  } else {
+    addWordStatus.textContent = message;
+  }
 }
 
 // Hide status message

@@ -17,7 +17,9 @@ import { STORAGE_KEYS, DEFAULT_SETTINGS, MAX_VOCABULARY_SIZE } from './constants
  *   usedCount: number (times used in writing),
  *   difficulty: 'beginner' | 'intermediate' | 'advanced',
  *   notes: string,
- *   tags: string[]
+ *   tags: string[],
+ *   sourceUrl: string (URL where word was found, if added via context menu),
+ *   sourceSentence: string (original sentence where word was found)
  * }
  */
 
@@ -68,7 +70,9 @@ export class StorageManager {
         usedCount: 0,
         difficulty: wordData.difficulty || 'intermediate',
         notes: wordData.notes || '',
-        tags: wordData.tags || []
+        tags: wordData.tags || [],
+        sourceUrl: wordData.sourceUrl || '',
+        sourceSentence: wordData.sourceSentence || ''
       };
 
       vocabulary.push(newWord);

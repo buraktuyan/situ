@@ -33,15 +33,39 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const selectedText = info.selectionText.trim();
 
     try {
+      // Show processing notification
+      chrome.tabs.sendMessage(tab.id, {
+        action: 'wordProcessing',
+        word: selectedText
+      });
+
+      // Request the full sentence context from the content script
+      const contextResponse = await chrome.tabs.sendMessage(tab.id, {
+        action: 'getSentenceContext',
+        word: selectedText
+      }).catch(() => ({ sentence: null }));
+
+      const sourceSentence = contextResponse?.sentence || null;
+      const sourceUrl = tab.url || '';
+
       // Check if AI is available for enrichment
       const aiAvailable = await AIHelper.checkAvailability();
 
-      let wordData = { word: selectedText };
+      let wordData = {
+        word: selectedText,
+        sourceUrl: sourceUrl,
+        sourceSentence: sourceSentence
+      };
 
       // If AI is available, enrich the word with definition, examples, etc.
       if (aiAvailable) {
         console.log('Enriching word with AI:', selectedText);
-        const enrichedData = await AIHelper.enrichWord(selectedText);
+        const settings = await StorageManager.getSettings();
+        const enrichedData = await AIHelper.enrichWord(
+          selectedText,
+          settings.difficulty || 'intermediate',
+          sourceSentence
+        );
         wordData = { ...wordData, ...enrichedData };
       }
 
@@ -72,6 +96,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       }
     } catch (error) {
       console.error('Error adding word from context menu:', error);
+      chrome.tabs.sendMessage(tab.id, {
+        action: 'wordError',
+        word: selectedText
+      });
     }
   }
 });

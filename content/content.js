@@ -513,6 +513,10 @@
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
+      case 'wordProcessing':
+        showNotification(`Adding "${message.word}"...`, 'info');
+        break;
+
       case 'wordAdded':
         vocabulary.push(message.word);
         showNotification(`"${message.word.word}" added to vocabulary!`, 'success');
@@ -523,6 +527,15 @@
 
       case 'wordExists':
         showNotification(`"${message.word}" is already in your vocabulary`, 'info');
+        break;
+
+      case 'wordError':
+        showNotification(`Error adding "${message.word}"`, 'error');
+        break;
+
+      case 'getSentenceContext':
+        const sentence = extractSentenceContext(message.word);
+        sendResponse({ sentence });
         break;
 
       case 'settingsUpdated':
@@ -539,7 +552,48 @@
         initialize();
         break;
     }
+    return true; // Keep message channel open for async response
   });
+
+  /**
+   * Extract the sentence containing a specific word from the selected text
+   */
+  function extractSentenceContext(word) {
+    try {
+      const selection = window.getSelection();
+      if (!selection || !selection.anchorNode) {
+        return null;
+      }
+
+      // Get the text content around the selection
+      let contextNode = selection.anchorNode;
+      if (contextNode.nodeType === Node.TEXT_NODE) {
+        contextNode = contextNode.parentElement;
+      }
+
+      let fullText = contextNode.textContent || '';
+
+      // If the context is too short, try to get more from parent
+      if (fullText.length < 100 && contextNode.parentElement) {
+        fullText = contextNode.parentElement.textContent || fullText;
+      }
+
+      // Find sentences containing the word
+      const sentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
+
+      for (const sentence of sentences) {
+        if (sentence.toLowerCase().includes(word.toLowerCase())) {
+          return sentence.trim();
+        }
+      }
+
+      // If no sentence found, return the selection context
+      return fullText.substring(0, 200).trim();
+    } catch (error) {
+      console.error('Error extracting sentence context:', error);
+      return null;
+    }
+  }
 
   function clearHighlights() {
     highlightedElements.forEach(el => {
