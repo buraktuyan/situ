@@ -4,7 +4,6 @@ let abortController = null;
 
 const promptInput = document.getElementById('promptInput');
 const submitBtn = document.getElementById('submitBtn');
-const streamBtn = document.getElementById('streamBtn');
 const stopBtn = document.getElementById('stopBtn');
 const responseDiv = document.getElementById('response');
 const statusDiv = document.getElementById('status');
@@ -16,7 +15,6 @@ async function checkAvailability() {
     if (typeof LanguageModel === "undefined") {
       showStatus('Global LanguageModel API is not available. Please enable Chrome AI flags.', 'error');
       submitBtn.disabled = true;
-      streamBtn.disabled = true;
       return false;
     }
 
@@ -26,23 +24,19 @@ async function checkAvailability() {
     if (availability === 'available') {
       showStatus('Chrome AI is ready!', 'success');
       submitBtn.disabled = false;
-      streamBtn.disabled = false;
       return true;
     } else if (availability === 'downloading') {
       showStatus('Chrome AI model is downloading... Please wait and try again later', 'warning');
       submitBtn.disabled = true;
-      streamBtn.disabled = true;
       return false;
     } else {
       showStatus(`Model is not ready. Status: '${availability}'. Check chrome://on-device-internals`, 'error');
       submitBtn.disabled = true;
-      streamBtn.disabled = true;
       return false;
     }
   } catch (error) {
     showStatus(`Error checking availability: ${error.message}`, 'error');
     submitBtn.disabled = true;
-    streamBtn.disabled = true;
     return false;
   }
 }
@@ -76,7 +70,6 @@ async function handleSubmit() {
 
   isProcessing = true;
   submitBtn.disabled = true;
-  streamBtn.disabled = true;
   stopBtn.disabled = false;
   responseDiv.textContent = '';
   showStatus('Thinking...', 'info');
@@ -120,7 +113,6 @@ async function handleSubmit() {
     }
     isProcessing = false;
     submitBtn.disabled = false;
-    streamBtn.disabled = false;
     stopBtn.disabled = true;
     abortController = null;
   }
@@ -142,7 +134,6 @@ async function handleStreamingSubmit() {
 
   isProcessing = true;
   submitBtn.disabled = true;
-  streamBtn.disabled = true;
   stopBtn.disabled = false;
   responseDiv.textContent = '';
   showStatus('Streaming response...', 'info');
@@ -168,7 +159,7 @@ async function handleStreamingSubmit() {
 
     // Process the stream chunks
     for await (const chunk of stream) {
-      responseDiv.textContent = chunk;
+      responseDiv.textContent += chunk;
       // Auto-scroll to bottom as new content arrives
       responseDiv.scrollTop = responseDiv.scrollHeight;
     }
@@ -180,7 +171,12 @@ async function handleStreamingSubmit() {
       responseDiv.textContent += '\n\n[Stopped by user]';
     } else {
       showStatus(`Error: ${error.message}`, 'error');
-      responseDiv.textContent = `Error: ${error.message}\n\nPlease make sure you're using Chrome 128+ and have enabled the Prompt API feature flags.`;
+      // Preserve any partial streaming results
+      if (responseDiv.textContent) {
+        responseDiv.textContent += `\n\n[Error: ${error.message}]`;
+      } else {
+        responseDiv.textContent = `Error: ${error.message}\n\nPlease make sure you're using Chrome 128+ and have enabled the Prompt API feature flags.`;
+      }
     }
   } finally {
     // Clean up the session
@@ -191,7 +187,6 @@ async function handleStreamingSubmit() {
     }
     isProcessing = false;
     submitBtn.disabled = false;
-    streamBtn.disabled = false;
     stopBtn.disabled = true;
     abortController = null;
   }
@@ -206,14 +201,11 @@ function handleStop() {
 }
 
 // Event listeners
-submitBtn.addEventListener('click', handleSubmit);
-streamBtn.addEventListener('click', handleStreamingSubmit);
+submitBtn.addEventListener('click', handleStreamingSubmit);
 stopBtn.addEventListener('click', handleStop);
 
 promptInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.ctrlKey) {
-    handleSubmit();
-  } else if (e.key === 'Enter' && e.shiftKey) {
+  if (e.key === 'Enter' && (e.ctrlKey || e.shiftKey)) {
     handleStreamingSubmit();
   }
 });
