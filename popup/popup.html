@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Situ - Vocabulary Learning</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="logo">
+        <span class="logo-icon">📚</span>
+        Situ
+      </h1>
+      <p class="tagline">Learn vocabulary while browsing</p>
+    </header>
+
+    <!-- Quick Stats -->
+    <section class="stats" aria-label="Vocabulary statistics">
+      <div class="stat-card">
+        <div class="stat-value" id="totalWords">0</div>
+        <div class="stat-label">Words</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="seenToday">0</div>
+        <div class="stat-label">Seen Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="usedToday">0</div>
+        <div class="stat-label">Used Today</div>
+      </div>
+    </section>
+
+    <!-- Mode Toggles -->
+    <section class="modes">
+      <div class="mode-toggle">
+        <label class="toggle-label">
+          <input type="checkbox" id="readingModeToggle" />
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">
+            <span class="toggle-icon">👁️</span>
+            Reading Mode
+          </span>
+        </label>
+      </div>
+      <div class="mode-toggle">
+        <label class="toggle-label">
+          <input type="checkbox" id="writingModeToggle" />
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">
+            <span class="toggle-icon">✍️</span>
+            Writing Mode
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Add Word Section -->
+    <section class="add-word">
+      <h2 class="section-title">Add New Word</h2>
+      <div class="input-group">
+        <input
+          type="text"
+          id="newWordInput"
+          placeholder="Enter a word or phrase..."
+          aria-label="New word or phrase"
+        />
+        <button id="addWordBtn" class="btn-primary" aria-label="Add word">
+          <span class="btn-icon">+</span>
+        </button>
+      </div>
+      <div id="addWordStatus" class="status-message" role="status" aria-live="polite"></div>
+    </section>
+
+    <!-- Recent Words -->
+    <section class="recent-words">
+      <div class="section-header">
+        <h2 class="section-title">Recent Words</h2>
+        <button id="viewAllBtn" class="btn-link">View All</button>
+      </div>
+      <div id="recentWordsList" class="words-list">
+        <div class="empty-state">
+          <p>No words yet. Add your first word above or select text on any page and right-click!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI Status -->
+    <section class="ai-status" id="aiStatus">
+      <div class="ai-indicator">
+        <span class="ai-dot"></span>
+        <span class="ai-text">Checking AI availability...</span>
+      </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="actions">
+      <button id="dashboardBtn" class="btn-secondary">
+        <span class="btn-icon">⚙️</span>
+        Dashboard
+      </button>
+    </section>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
