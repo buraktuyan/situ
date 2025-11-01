@@ -42,6 +42,21 @@ const prevFlashcard = document.getElementById('prevFlashcard');
 const nextFlashcard = document.getElementById('nextFlashcard');
 const exitFlashcards = document.getElementById('exitFlashcards');
 
+// Writing challenge elements
+const startWritingBtn = document.getElementById('startWritingBtn');
+const writingChallengeView = document.getElementById('writingChallengeView');
+const challengeWord = document.getElementById('challengeWord');
+const challengeDefinition = document.getElementById('challengeDefinition');
+const userSentence = document.getElementById('userSentence');
+const submitSentence = document.getElementById('submitSentence');
+const skipWord = document.getElementById('skipWord');
+const exitWritingChallenge = document.getElementById('exitWritingChallenge');
+const challengeProgress = document.getElementById('challengeProgress');
+const challengeFeedback = document.getElementById('challengeFeedback');
+
+let writingChallengeWords = [];
+let writingChallengeIndex = 0;
+
 // Settings elements
 const settingReadingMode = document.getElementById('settingReadingMode');
 const settingWritingMode = document.getElementById('settingWritingMode');
@@ -116,6 +131,18 @@ function setupEventListeners() {
   prevFlashcard.addEventListener('click', showPrevFlashcard);
   nextFlashcard.addEventListener('click', showNextFlashcard);
   exitFlashcards.addEventListener('click', exitFlashcardsMode);
+
+  // Writing Challenge
+  startWritingBtn.addEventListener('click', startWritingChallenge);
+  submitSentence.addEventListener('click', checkWritingSentence);
+  skipWord.addEventListener('click', skipWritingWord);
+  exitWritingChallenge.addEventListener('click', exitWritingChallengeMode);
+  userSentence.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      checkWritingSentence();
+    }
+  });
 
   // Settings
   settingReadingMode.addEventListener('change', (e) => updateSetting('readingMode', e.target.checked));
@@ -496,6 +523,125 @@ function showNextFlashcard() {
 // Exit flashcards
 function exitFlashcardsMode() {
   flashcardView.style.display = 'none';
+  document.querySelector('.practice-modes').style.display = 'grid';
+}
+
+// ============ WRITING CHALLENGE ============
+
+// Start writing challenge
+function startWritingChallenge() {
+  if (vocabulary.length === 0) {
+    alert('Add some words to your vocabulary first!');
+    return;
+  }
+
+  // Select words that have definitions
+  writingChallengeWords = vocabulary
+    .filter(w => w.definition)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, Math.min(10, vocabulary.length));
+
+  if (writingChallengeWords.length === 0) {
+    alert('Add some definitions to your words first!');
+    return;
+  }
+
+  writingChallengeIndex = 0;
+
+  document.querySelector('.practice-modes').style.display = 'none';
+  writingChallengeView.style.display = 'block';
+
+  showWritingChallenge();
+}
+
+// Show current writing challenge
+function showWritingChallenge() {
+  if (writingChallengeWords.length === 0) return;
+
+  const word = writingChallengeWords[writingChallengeIndex];
+
+  challengeWord.textContent = word.word;
+  challengeDefinition.textContent = word.definition || '';
+  userSentence.value = '';
+  challengeFeedback.textContent = '';
+  challengeFeedback.className = 'challenge-feedback';
+
+  challengeProgress.textContent = `${writingChallengeIndex + 1} / ${writingChallengeWords.length}`;
+
+  userSentence.focus();
+}
+
+// Check user's sentence
+async function checkWritingSentence() {
+  const sentence = userSentence.value.trim();
+  const word = writingChallengeWords[writingChallengeIndex];
+
+  if (!sentence) {
+    showChallengeFeedback('Please write a sentence!', 'error');
+    return;
+  }
+
+  // Check if the word is used in the sentence (case-insensitive)
+  const wordUsed = sentence.toLowerCase().includes(word.word.toLowerCase());
+
+  if (wordUsed) {
+    showChallengeFeedback('Great job! ✓', 'success');
+
+    // Increment used count
+    await chrome.runtime.sendMessage({
+      action: 'incrementUsedCount',
+      word: word.word
+    });
+
+    // Move to next word after a short delay
+    setTimeout(() => {
+      if (writingChallengeIndex < writingChallengeWords.length - 1) {
+        writingChallengeIndex++;
+        showWritingChallenge();
+      } else {
+        showCompletionMessage();
+      }
+    }, 1000);
+  } else {
+    showChallengeFeedback(`Try using the word "${word.word}" in your sentence.`, 'error');
+  }
+}
+
+// Skip current word
+function skipWritingWord() {
+  if (writingChallengeIndex < writingChallengeWords.length - 1) {
+    writingChallengeIndex++;
+    showWritingChallenge();
+  } else {
+    showCompletionMessage();
+  }
+}
+
+// Show challenge feedback
+function showChallengeFeedback(message, type) {
+  challengeFeedback.textContent = message;
+  challengeFeedback.className = `challenge-feedback challenge-feedback-${type}`;
+}
+
+// Show completion message
+function showCompletionMessage() {
+  challengeFeedback.textContent = '🎉 Challenge completed! Great work!';
+  challengeFeedback.className = 'challenge-feedback challenge-feedback-success';
+  submitSentence.disabled = true;
+  skipWord.disabled = true;
+  userSentence.disabled = true;
+
+  setTimeout(() => {
+    exitWritingChallengeMode();
+    submitSentence.disabled = false;
+    skipWord.disabled = false;
+    userSentence.disabled = false;
+  }, 2000);
+}
+
+// Exit writing challenge
+function exitWritingChallengeMode() {
+  writingChallengeView.style.display = 'none';
   document.querySelector('.practice-modes').style.display = 'grid';
 }
 
